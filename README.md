@@ -1,8 +1,8 @@
 # Portfólio · Nicolas Paixão
 
-Site de creative developer. No ar em https://nicolaspaixao.com.br (também em https://nicolas-paixao.vercel.app)
+Site de creative developer. No ar em https://nicolaspaixao.com.br (também em https://nicolas-paixao.vercel.app).
 
-Astro 7, com CSS e JavaScript próprios e fontes do Fontsource (Anybody e Atkinson Hyperlegible Next). O mundo 3D da camada de baixo entra na fase 04 do roadmap.
+Astro 7, GSAP, Lenis e Three.js, com CSS e JavaScript próprios e fontes do Fontsource (Anybody e Atkinson Hyperlegible Next). A água é uma simulação de fluido em WebGL, e o modo Abismo usa modelos 3D.
 
 ## Rodar
 
@@ -37,7 +37,7 @@ A pasta já está ligada ao projeto `nicolas-paixao` na Vercel.
 2. Coloque os prints em `src/assets/projetos/<id>/`.
 3. Use `ordem` para definir a posição no índice.
 
-As rotas `/projetos/<id>/` e `/en/projects/<id>/` são geradas sozinhas. A coluna da home passa a mostrar só as capas quando houver 3 projetos ou mais.
+As rotas `/projetos/<id>/` e `/en/projects/<id>/` são geradas sozinhas. A coluna da home passa a mostrar só as capas quando houver 4 projetos ou mais.
 
 ### Tirar um projeto
 
@@ -45,7 +45,11 @@ Apague o arquivo `.md` e a pasta de prints dele.
 
 ## Profundidade
 
-O controle Superfície / Raso / Fundo troca o tema da página inteira. Um link com `?profundidade=raso` abre direto nessa profundidade. Sem suporte a View Transitions, ou com movimento reduzido ligado, a troca é imediata.
+O controle Superfície / Raso / Fundo, mais a lanterna do Abismo, troca o tema da página inteira. A rolagem do mouse também mergulha quando a página chega ao fim. Um link com `?profundidade=abismo` abre direto nessa profundidade. Sem WebGL, ou com movimento reduzido ligado, a troca é imediata e o texto fica visível.
+
+### Modelos 3D
+
+Os peixes do Abismo ficam em `public/modelos/` e **não** estão no repositório, porque a licença dos modelos do Fab ainda precisa ser confirmada. Para rodar o Abismo completo, coloque `atum.glb` e `tubarao.glb` nessa pasta. Sem eles, o site funciona e o Abismo aparece sem peixes.
 
 ## Contexto de design
 
