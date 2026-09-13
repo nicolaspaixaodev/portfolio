@@ -1,41 +1,70 @@
 ---
 import type { ImageMetadata } from "astro";
 import { getCollection } from "astro:content";
-import Indice from "../Indice.astro";
 import Contato from "../Contato.astro";
 import Midia from "../Midia.astro";
+import Icone from "../Icone.astro";
 import { rotas, textos, type Lang } from "../../i18n/ui";
 import { site } from "../../data/site";
+import { servicos, linhasMinimas } from "../../data/servicos";
+import previaPt1 from "../../assets/previas/previa-pt-1.jpg";
+import previaPt2 from "../../assets/previas/previa-pt-2.jpg";
+import previaPt3 from "../../assets/previas/previa-pt-3.jpg";
+import previaEn1 from "../../assets/previas/previa-en-1.jpg";
+import previaEn2 from "../../assets/previas/previa-en-2.jpg";
+import previaEn3 from "../../assets/previas/previa-en-3.jpg";
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
 const t = textos(lang);
+const previas: ImageMetadata[] = lang === "pt" ? [previaPt1, previaPt2, previaPt3] : [previaEn1, previaEn2, previaEn3];
 
 const projetos = (await getCollection("projetos")).sort((a, b) => a.data.ordem - b.data.ordem);
 
 /*
- * A coluna rola junto com a página, como na referência, sem repetir nada.
- * Com 4 projetos ou mais, cada um entra com a capa; com menos, entram os prints
- * de desktop de cada projeto, pra coluna ter corpo.
+ * O tambor: cada linha é um prisma com uma face por serviço. A face k da linha i
+ * é o i-ésimo projeto daquele serviço, só com a capa. Onde falta projeto, entra
+ * uma prévia, e as prévias somem sozinhas conforme os projetos chegam.
  */
-type Item = { projeto: string; href: string; nome: string; src: ImageMetadata; alt: string; principal: boolean };
-const itens: Item[] = [];
-for (const projeto of projetos) {
-  const href = rotas.projeto(projeto.id)[lang];
-  const nome = projeto.data.nome;
-  if (projetos.length >= 4) {
-    itens.push({ projeto: projeto.id, href, nome, src: projeto.data.capa, alt: projeto.data.capaAlt[lang], principal: true });
-    continue;
-  }
-  projeto.data.galeria
-    .filter((g) => g.formato === "desktop")
-    .forEach((g, i) => itens.push({ projeto: projeto.id, href, nome, src: g.src, alt: g.alt[lang], principal: i === 0 }));
-}
+const porServico = servicos.map((s) => projetos.filter((p) => p.data.categoria === s.id));
+const linhas = Math.max(linhasMinimas, ...porServico.map((lista) => lista.length));
+
+type Face =
+  | { tipo: "projeto"; id: string; href: string; nome: string; detalhe: string; src: ImageMetadata; alt: string }
+  | { tipo: "previa"; nome: string; detalhe: string; src: ImageMetadata; alt: string };
+
+const grade: Face[][] = Array.from({ length: linhas }, (_, i) =>
+  servicos.map((servico, k): Face => {
+    const projeto = porServico[k][i];
+    if (projeto) {
+      return {
+        tipo: "projeto",
+        id: projeto.id,
+        href: rotas.projeto(projeto.id)[lang],
+        nome: projeto.data.nome,
+        detalhe: `${projeto.data.tipo[lang]} · ${projeto.data.ano}`,
+        src: projeto.data.capa,
+        alt: `${projeto.data.nome}: ${projeto.data.capaAlt[lang]}`,
+      };
+    }
+    const n = i - porServico[k].length;
+    return {
+      tipo: "previa",
+      nome: t.emBreve,
+      detalhe: t.espacoPara(servico.nome),
+      src: previas[n % previas.length],
+      alt: `${t.vagaDe} ${servico.nome}`,
+    };
+  })
+);
+
+// Abre no primeiro serviço que já tem trabalho de verdade.
+const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
 ---
 
-<div class="inicio">
+<div class="inicio" data-servico-inicial={inicial}>
   <section class="inicio-titulo">
     <h1 class="display inicio-nome" data-split data-proximidade>
       <span>Nicolas</span>
@@ -44,27 +73,80 @@ for (const projeto of projetos) {
     <p class="inicio-linha" data-anim data-atraso="0.25">{t.linha}</p>
   </section>
 
+  <nav class="servicos" aria-labelledby="servicos-titulo" data-anim data-atraso="0.35">
+    <div class="servicos-topo">
+      <h2 id="servicos-titulo" class="rotulo servicos-titulo">{t.servicos}</h2>
+      <div class="servicos-setas">
+        <button class="seta" type="button" data-passo="-1" aria-label={t.servicoAnterior}>
+          <Icone nome="seta-esquerda" />
+        </button>
+        <button class="seta" type="button" data-passo="1" aria-label={t.servicoSeguinte}>
+          <Icone nome="seta-direita" />
+        </button>
+      </div>
+    </div>
+    <ol class="servicos-lista">
+      {
+        servicos.map((servico, k) => (
+          <li>
+            <button class="servicos-item" type="button" data-servico={k} aria-pressed={k === inicial ? "true" : "false"}>
+              {servico.nome}
+            </button>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="servicos-focos">
+      {
+        servicos.map((servico, k) => (
+          <p class="servicos-foco" data-servico={k} data-ativo={k === inicial ? "true" : "false"} aria-hidden={k === inicial ? undefined : "true"}>
+            {servico.foco[lang]}
+          </p>
+        ))
+      }
+    </div>
+    <p class="sr-only servicos-aviso" aria-live="polite"></p>
+  </nav>
+
   <section class="inicio-coluna" aria-label={t.trabalhos}>
     {
-      itens.map((item, i) => (
-        <a class="coluna-item" href={item.href} data-projeto={item.projeto} data-anim="agua" data-atraso={String(0.1 + i * 0.1)}>
-          <Midia
-            src={item.src}
-            alt={`${item.nome}: ${item.alt}`}
-            widths={[640, 1024, 1600]}
-            sizes="(min-width: 1024px) 29vw, 100vw"
-            loading={i === 0 ? "eager" : "lazy"}
-            prioridade={i === 0}
-            nome={item.principal ? `midia-${item.projeto}` : undefined}
-          />
-        </a>
+      grade.map((faces, i) => (
+        <div class="tambor-linha">
+          <div class="tambor" data-anim="agua" data-atraso={String(0.1 + i * 0.1)} data-linha={i}>
+            {faces.map((face, k) =>
+              face.tipo === "projeto" ? (
+                <a class="tambor-face" href={face.href} data-face={k} data-projeto={face.id}>
+                  <Midia
+                    src={face.src}
+                    alt={face.alt}
+                    widths={[640, 1024, 1600]}
+                    sizes="(min-width: 1024px) 31vw, 86vw"
+                    loading={k === inicial && i === 0 ? "eager" : "lazy"}
+                    prioridade={k === inicial && i === 0}
+                    nome={`midia-${face.id}`}
+                  />
+                </a>
+              ) : (
+                <div class="tambor-face" data-face={k}>
+                  <Midia src={face.src} alt={face.alt} widths={[640, 1024]} sizes="(min-width: 1024px) 31vw, 86vw" />
+                </div>
+              )
+            )}
+            <button class="tambor-lado" type="button" data-passo="-1" tabindex="-1" aria-hidden="true" />
+            <button class="tambor-lado" type="button" data-passo="1" tabindex="-1" aria-hidden="true" />
+          </div>
+          <p class="tambor-legenda">
+            {faces.map((face, k) => (
+              <span class="tambor-legenda-face" data-face={k} data-ativo={k === inicial ? "true" : "false"}>
+                <span class="tambor-legenda-nome">{face.nome}</span>
+                <span class="rotulo">{face.detalhe}</span>
+              </span>
+            ))}
+          </p>
+        </div>
       ))
     }
   </section>
-
-  <aside class="inicio-indice" data-anim data-atraso="0.35">
-    <Indice lang={lang} projetos={projetos} />
-  </aside>
 
   <footer class="inicio-rodape" data-anim data-atraso="0.45">
     <Contato lang={lang} />
@@ -91,23 +173,230 @@ for (const projeto of projetos) {
     text-wrap: pretty;
   }
 
-  .inicio-coluna {
-    padding: 2.5rem var(--margem) 0;
+  /* ---------- Serviços ---------- */
+
+  .servicos {
+    padding: 2.75rem var(--margem) 0;
     display: grid;
-    gap: 0.75rem;
+    gap: 0.9rem;
   }
 
-  .coluna-item {
+  .servicos-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .servicos-titulo {
+    font-weight: 400;
+  }
+
+  .servicos-setas {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .seta {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 1.5px solid var(--fg);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    transition:
+      background-color 300ms var(--ease-agua),
+      color 300ms var(--ease-agua),
+      transform 500ms var(--ease-agua);
+  }
+
+  .seta :global(svg) {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .seta:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .seta:active {
+    transform: scale(0.92);
+  }
+
+  .seta:focus-visible {
+    outline: 2px solid var(--pino);
+    outline-offset: 3px;
+  }
+
+  .servicos-lista {
+    display: grid;
+    gap: 0.2rem;
+    justify-items: start;
+  }
+
+  .servicos-item {
+    padding: 0.2rem 0;
+    border: 0;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    font-size: var(--texto-ui);
+    text-align: inherit;
+    cursor: pointer;
+    transition: opacity 300ms var(--ease-agua);
+  }
+
+  /* A linha d'água marca o serviço de frente */
+  .servicos-item::before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 1rem;
+    height: 3px;
+    margin-right: 0.5rem;
+    background: var(--pino);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 600ms var(--ease-agua);
+  }
+
+  .servicos-item[aria-pressed="true"]::before {
+    transform: scaleX(1);
+  }
+
+  .servicos-item[aria-pressed="false"] {
+    opacity: 0.55;
+  }
+
+  .servicos-item:hover,
+  .servicos-item:focus-visible {
+    opacity: 1;
+  }
+
+  .servicos-item:focus-visible {
+    outline: 2px solid var(--pino);
+    outline-offset: 3px;
+  }
+
+  /* Os textos dividem a mesma célula: a altura não pula quando o serviço muda */
+  .servicos-focos {
+    display: grid;
+    max-width: 34ch;
+  }
+
+  .servicos-foco {
+    grid-area: 1 / 1;
+    font-size: var(--texto-ui);
+    line-height: 1.45;
+    color: var(--fg-2);
+    text-wrap: pretty;
+    transition:
+      opacity 500ms var(--ease-agua),
+      transform 700ms var(--ease-agua),
+      visibility 0s linear 700ms;
+  }
+
+  .servicos-foco[data-ativo="false"] {
+    opacity: 0;
+    transform: translateY(0.4rem);
+    visibility: hidden;
+  }
+
+  .servicos-foco[data-ativo="true"] {
+    transition-delay: 120ms, 120ms, 0s;
+  }
+
+  /* ---------- Tambor ---------- */
+
+  .inicio-coluna {
+    padding: 2.25rem var(--margem) 0;
+    display: grid;
+    gap: 1.5rem;
+    touch-action: pan-y;
+  }
+
+  .tambor-linha {
+    display: grid;
+    gap: 0.6rem;
+    /* as frestas das faces vizinhas precisam de lugar dos dois lados */
+    padding: 0 12%;
+  }
+
+  .tambor {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    transform-style: preserve-3d;
+  }
+
+  .tambor-face {
+    position: absolute;
+    inset: 0;
     display: block;
     outline-offset: 4px;
+    will-change: transform;
   }
 
-  .coluna-item :global(.midia) {
-    aspect-ratio: 16 / 10;
+  .tambor-face :global(.midia) {
+    width: 100%;
+    height: 100%;
   }
 
-  .inicio-indice {
-    padding: 3rem var(--margem) 0;
+  /* Clicar na fresta de uma face vizinha gira até ela */
+  .tambor-lado {
+    position: absolute;
+    top: 6%;
+    bottom: 6%;
+    width: 9%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .tambor-lado[data-passo="-1"] {
+    right: 100%;
+  }
+
+  .tambor-lado[data-passo="1"] {
+    left: 100%;
+  }
+
+  .tambor-legenda {
+    display: grid;
+    font-size: var(--texto-ui);
+    transition: opacity 350ms var(--ease-agua);
+  }
+
+  /* Rolando, a legenda some antes de passar por baixo do cabeçalho fixo */
+  .tambor-legenda.sob-cabecalho {
+    opacity: 0;
+  }
+
+  .tambor-legenda-face {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.1rem 0.6rem;
+    transition:
+      opacity 450ms var(--ease-agua),
+      transform 650ms var(--ease-agua),
+      visibility 0s linear 650ms;
+  }
+
+  .tambor-legenda-face[data-ativo="false"] {
+    opacity: 0;
+    transform: translateY(0.35rem);
+    visibility: hidden;
+  }
+
+  .tambor-legenda-face[data-ativo="true"] {
+    transition-delay: 180ms, 180ms, 0s;
   }
 
   .inicio-rodape {
@@ -144,21 +433,43 @@ for (const projeto of projetos) {
       max-width: 26rem;
     }
 
-    /* A coluna é o conteúdo que rola; o resto fica parado em volta dela */
-    .inicio-coluna {
-      width: 28.5vw;
-      margin-left: 46.5vw;
-      padding: calc(var(--cab-h) + 1.25rem) 0 42vh;
-      gap: 1rem;
-    }
-
-    .inicio-indice {
+    .servicos {
       position: fixed;
       right: var(--margem);
-      top: 38vh;
-      width: 15vw;
+      top: 30vh;
+      width: min(16rem, 16.5vw);
       padding: 0;
       z-index: 2;
+      justify-items: end;
+      text-align: right;
+    }
+
+    .servicos-topo {
+      width: 100%;
+    }
+
+    .servicos-lista {
+      justify-items: end;
+    }
+
+    .servicos-item::before {
+      transform-origin: right;
+    }
+
+    .servicos-focos {
+      justify-self: end;
+    }
+
+    /* A coluna é o conteúdo que rola; o resto fica parado em volta dela */
+    .inicio-coluna {
+      width: 36vw;
+      margin-left: 45.2vw;
+      padding: calc(var(--cab-h) + 1.25rem) 0 42vh;
+      gap: 1.75rem;
+    }
+
+    .tambor-linha {
+      padding: 0 3.75vw;
     }
 
     .inicio-rodape {
@@ -182,86 +493,195 @@ for (const projeto of projetos) {
       max-width: 42vw;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .servicos-foco,
+    .tambor-legenda-face {
+      transition: none;
+    }
+  }
 </style>
 
 <script>
-  import { encher } from "../../scripts/movimento";
+  import gsap from "gsap";
+  import { estado } from "../../scripts/estado";
+  import { FACES, FOCO, distancia, pose } from "../../scripts/tambor";
 
   let limpar: (() => void) | undefined;
+  const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   document.addEventListener("astro:page-load", () => {
     limpar?.();
-    const itens = [...document.querySelectorAll<HTMLElement>(".coluna-item[data-projeto]")];
-    if (!itens.length) return;
+    const inicio = document.querySelector<HTMLElement>(".inicio[data-servico-inicial]");
+    if (!inicio) return;
     const limpezas: (() => void)[] = [];
+    function ouvir<E extends Event>(el: EventTarget, tipo: string, fn: (e: E) => void, opcoes?: AddEventListenerOptions) {
+      el.addEventListener(tipo, fn as EventListener, opcoes);
+      limpezas.push(() => el.removeEventListener(tipo, fn as EventListener, opcoes));
+    }
 
-    const indice = document.querySelector<HTMLElement>(".indice-lista");
-    const ativar = (id?: string) =>
-      indice?.querySelectorAll<HTMLElement>(".indice-item").forEach((item) => (item.dataset.ativo = String(item.dataset.projeto === id)));
+    const botoes = [...inicio.querySelectorAll<HTMLElement>(".servicos-item")];
+    const nomes = botoes.map((b) => b.textContent?.trim() ?? "");
+    const focos = [...inicio.querySelectorAll<HTMLElement>(".servicos-foco")];
+    const aviso = inicio.querySelector<HTMLElement>(".servicos-aviso");
 
-    // A linha d'água do índice acompanha o projeto que está no meio da tela.
-    const observador = new IntersectionObserver(
-      (entradas) => {
-        for (const entrada of entradas) if (entrada.isIntersecting) ativar((entrada.target as HTMLElement).dataset.projeto);
-      },
-      { rootMargin: "-45% 0px -45% 0px" }
-    );
-    itens.forEach((item) => observador.observe(item));
+    type Linha = { tambor: HTMLElement; faces: HTMLElement[]; legendas: HTMLElement[]; valor: number; frente: number };
+    const linhas: Linha[] = [...inicio.querySelectorAll<HTMLElement>(".tambor")].map((tambor) => ({
+      tambor,
+      faces: [...tambor.querySelectorAll<HTMLElement>(".tambor-face")],
+      legendas: [...(tambor.nextElementSibling?.querySelectorAll<HTMLElement>(".tambor-legenda-face") ?? [])],
+      valor: 0,
+      frente: -1,
+    }));
+
+    const modulo = (n: number) => ((Math.round(n) % FACES) + FACES) % FACES;
+
+    // Volta no serviço que estava de frente antes de abrir um projeto.
+    let alvo = Number(inicio.dataset.servicoInicial ?? 0);
+    try {
+      const salvo = sessionStorage.getItem("servico");
+      if (salvo !== null && /^\d$/.test(salvo)) alvo = modulo(Number(salvo));
+    } catch {}
+    linhas.forEach((l) => (l.valor = alvo));
+
+    /** Põe cada face onde o giro da linha manda (CSS e WebGL). */
+    function aplicar(linha: Linha) {
+      const largura = linha.tambor.clientWidth;
+      linha.tambor.style.perspective = `${Math.round(largura * FOCO)}px`;
+      linha.faces.forEach((face, k) => {
+        const d = distancia(k, linha.valor);
+        estado.faces.set(face, d);
+        const p = pose(d, largura);
+        face.style.transform = `translate3d(${p.x.toFixed(2)}px, 0, ${p.z.toFixed(2)}px) rotateY(${p.angulo.toFixed(4)}rad)`;
+        face.style.visibility = p.visivel ? "" : "hidden";
+        face.style.filter = p.sombra > 0.01 ? `brightness(${(1 - p.sombra * 0.7).toFixed(3)})` : "";
+      });
+      const frente = modulo(linha.valor);
+      if (frente === linha.frente) return;
+      linha.frente = frente;
+      linha.faces.forEach((face, k) => {
+        const naFrente = k === frente;
+        face.inert = !naFrente;
+        face.toggleAttribute("aria-hidden", !naFrente);
+        // Só a capa de frente atravessa pra página do projeto.
+        const midia = face.querySelector<HTMLElement>("[data-midia]");
+        if (midia && face.dataset.projeto) midia.style.viewTransitionName = naFrente ? `midia-${face.dataset.projeto}` : "none";
+      });
+      linha.legendas.forEach((legenda, k) => {
+        legenda.dataset.ativo = String(k === frente);
+        legenda.toggleAttribute("aria-hidden", k !== frente);
+      });
+    }
+
+    function marcarServico(indice: number, anunciar: boolean) {
+      botoes.forEach((b, k) => b.setAttribute("aria-pressed", String(k === indice)));
+      focos.forEach((p, k) => {
+        p.dataset.ativo = String(k === indice);
+        p.toggleAttribute("aria-hidden", k !== indice);
+      });
+      if (anunciar && aviso) aviso.textContent = `${nomes[indice]}: ${focos[indice]?.textContent?.trim() ?? ""}`;
+      try {
+        sessionStorage.setItem("servico", String(indice));
+      } catch {}
+    }
+
+    function girarPara(novo: number) {
+      if (novo === alvo) return;
+      alvo = novo;
+      marcarServico(modulo(alvo), true);
+      const imediato = semMovimento.matches;
+      linhas.forEach((linha, i) => {
+        gsap.to(linha, {
+          valor: alvo,
+          duration: imediato ? 0 : 1.2,
+          delay: imediato ? 0 : i * 0.085,
+          ease: "power3.inOut",
+          overwrite: true,
+          onUpdate: () => aplicar(linha),
+          onComplete: () => aplicar(linha),
+        });
+      });
+    }
+
+    const passo = (n: number) => girarPara(alvo + n);
+    /** Pelo caminho mais curto até o serviço escolhido. */
+    const irPara = (indice: number) => {
+      let diferenca = (indice - modulo(alvo) + FACES) % FACES;
+      if (diferenca > FACES / 2) diferenca -= FACES;
+      passo(diferenca);
+    };
+
+    marcarServico(modulo(alvo), false);
+    linhas.forEach(aplicar);
+
+    inicio.querySelectorAll<HTMLElement>("[data-passo]").forEach((botao) => ouvir(botao, "click", () => passo(Number(botao.dataset.passo))));
+    botoes.forEach((botao) => ouvir(botao, "click", () => irPara(Number(botao.dataset.servico))));
+
+    // Setas do teclado giram de qualquer lugar da home, menos de dentro de um campo.
+    ouvir<KeyboardEvent>(document, "keydown", (e) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      if ((e.target as HTMLElement | null)?.closest?.("input, textarea, select, [contenteditable]")) return;
+      if (e.key === "ArrowRight") passo(1);
+      else if (e.key === "ArrowLeft") passo(-1);
+    });
+
+    // Arrastar pro lado no toque, ou deslizar dois dedos no trackpad, também gira.
+    const coluna = inicio.querySelector<HTMLElement>(".inicio-coluna");
+    if (coluna) {
+      let toque: { x: number; y: number; id: number } | null = null;
+      ouvir<PointerEvent>(coluna, "pointerdown", (e) => {
+        if (e.pointerType !== "mouse") toque = { x: e.clientX, y: e.clientY, id: e.pointerId };
+      });
+      ouvir<PointerEvent>(coluna, "pointerup", (e) => {
+        if (!toque || e.pointerId !== toque.id) return;
+        const dx = e.clientX - toque.x;
+        const dy = e.clientY - toque.y;
+        toque = null;
+        if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) passo(dx < 0 ? 1 : -1);
+      });
+      ouvir(coluna, "pointercancel", () => (toque = null));
+
+      let acumulado = 0;
+      let travado = 0;
+      ouvir<WheelEvent>(
+        coluna,
+        "wheel",
+        (e) => {
+          if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+          e.preventDefault();
+          const agora = performance.now();
+          if (agora < travado) return;
+          acumulado += e.deltaX;
+          if (Math.abs(acumulado) > 70) {
+            passo(acumulado > 0 ? 1 : -1);
+            acumulado = 0;
+            travado = agora + 650;
+          }
+        },
+        { passive: false }
+      );
+    }
+
+    // As fotos somem suaves sob o cabeçalho (no WebGL); as legendas, que são texto, somem aqui.
+    const cabecalho = document.querySelector<HTMLElement>("body > header");
+    const legendas = [...inicio.querySelectorAll<HTMLElement>(".tambor-legenda")];
+    const vigiarCabecalho = () => {
+      if (!cabecalho || getComputedStyle(cabecalho).position !== "fixed") return;
+      const limite = cabecalho.getBoundingClientRect().bottom + 8;
+      legendas.forEach((l) => l.classList.toggle("sob-cabecalho", l.getBoundingClientRect().top < limite));
+    };
+    gsap.ticker.add(vigiarCabecalho);
+    limpezas.push(() => gsap.ticker.remove(vigiarCabecalho));
+
+    // A largura muda com a janela; as faces recalculam.
+    const observador = new ResizeObserver(() => linhas.forEach(aplicar));
+    linhas.forEach((l) => observador.observe(l.tambor));
     limpezas.push(() => observador.disconnect());
 
-    // Mouse na foto acende o nome no índice.
-    itens.forEach((item) => {
-      const id = item.dataset.projeto;
-      const nomeNoIndice = indice?.querySelector<HTMLElement>(`.indice-item[data-projeto="${id}"]`);
-      const entra = () => {
-        ativar(id);
-        indice?.classList.add("com-foco");
-        nomeNoIndice?.classList.add("em-foco");
-      };
-      const sai = () => {
-        indice?.classList.remove("com-foco");
-        nomeNoIndice?.classList.remove("em-foco");
-      };
-      item.addEventListener("pointerenter", entra);
-      item.addEventListener("pointerleave", sai);
-      limpezas.push(() => {
-        item.removeEventListener("pointerenter", entra);
-        item.removeEventListener("pointerleave", sai);
-      });
-    });
-
-    // Mouse no nome do índice enche de cor a foto daquele projeto mais perto do centro da tela.
-    const midiaMaisPerto = (id?: string) => {
-      const centro = window.innerHeight / 2;
-      return (
-        itens
-          .filter((i) => i.dataset.projeto === id)
-          .map((i) => i.querySelector<HTMLElement>("[data-midia]"))
-          .filter((m): m is HTMLElement => Boolean(m))
-          .sort((a, b) => {
-            const ra = a.getBoundingClientRect();
-            const rb = b.getBoundingClientRect();
-            return Math.abs(ra.top + ra.height / 2 - centro) - Math.abs(rb.top + rb.height / 2 - centro);
-          })[0] ?? null
-      );
+    limpar = () => {
+      linhas.forEach((l) => gsap.killTweensOf(l));
+      limpezas.forEach((f) => f());
     };
-    indice?.querySelectorAll<HTMLElement>(".indice-link").forEach((link) => {
-      const id = link.closest<HTMLElement>(".indice-item")?.dataset.projeto;
-      const entra = () => encher(midiaMaisPerto(id), true);
-      const sai = () => encher(midiaMaisPerto(id), false);
-      link.addEventListener("pointerenter", entra);
-      link.addEventListener("pointerleave", sai);
-      link.addEventListener("focus", entra);
-      link.addEventListener("blur", sai);
-      limpezas.push(() => {
-        link.removeEventListener("pointerenter", entra);
-        link.removeEventListener("pointerleave", sai);
-        link.removeEventListener("focus", entra);
-        link.removeEventListener("blur", sai);
-      });
-    });
-
-    limpar = () => limpezas.forEach((f) => f());
   });
 
   document.addEventListener("astro:before-swap", () => limpar?.());

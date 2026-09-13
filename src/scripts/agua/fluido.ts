@@ -202,6 +202,8 @@ class Par {
 }
 
 export class Fluido {
+  /** Só pra depuração: a tinta não dissipa. */
+  congelada = false;
   private renderer: WebGLRenderer;
   private cena = new Scene();
   private camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -340,7 +342,7 @@ export class Fluido {
 
     m.adveccao.uniforms.uVelocidade.value = this.velocidade.ler.texture;
     m.adveccao.uniforms.uFonte.value = this.tinta.ler.texture;
-    m.adveccao.uniforms.uDissipacao.value = 3.2 * fator;
+    m.adveccao.uniforms.uDissipacao.value = (this.congelada ? 0 : 3.2) * fator;
     // A tinta anda na escala da velocidade, mesmo tendo resolução maior.
     this.passo(m.adveccao, this.tinta.escrever);
     this.tinta.trocar();

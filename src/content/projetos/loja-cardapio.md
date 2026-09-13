@@ -1,5 +1,6 @@
 ---
 ordem: 1
+categoria: ecommerce
 nome: Loja Cozinha Autoral
 ano: 2026
 tipo:

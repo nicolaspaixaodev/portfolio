@@ -14,6 +14,7 @@ import {
   ShaderMaterial,
   Texture,
   Vector2,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import gsap from "gsap";
@@ -22,6 +23,7 @@ import { FRAGMENTO_FUNDO, FRAGMENTO_IMAGEM, FRAGMENTO_TITULO, VERTICE_IMAGEM, VE
 import { estado } from "../estado";
 import { criarAbismo } from "./abismo";
 import { criarCamadaTextos } from "./textos";
+import { FOCO, pose } from "../tambor";
 
 type Plano = {
   el: HTMLElement;
@@ -32,6 +34,9 @@ type Plano = {
   material: ShaderMaterial;
   textura: Texture | null;
   eixo: 0 | 1;
+  /** Face do tambor da home: gira em 3D dentro do espaço da linha. */
+  face: HTMLElement | null;
+  espaco: HTMLElement | null;
   pronto: boolean;
   cheia: number;
   proporcao: number;
@@ -66,6 +71,8 @@ export function iniciar() {
   const geometria = new PlaneGeometry(1, 1, 24, 24);
   const camera = new PerspectiveCamera(35, 1, 10, 10000);
   const fluido = new Fluido(renderer);
+  // Pra conferir a pincelada numa captura: ?tinta-parada deixa o rastro sem dissipar.
+  fluido.congelada = new URLSearchParams(location.search).has("tinta-parada");
 
   const resolucao = new Vector2();
   const viewport = new Vector2();
@@ -84,6 +91,7 @@ export function iniciar() {
       uResolucao: { value: resolucao },
       uTempo: { value: 0 },
       uProfundidade: { value: profundidade.valor },
+      uPonteiro: { value: new Vector2(0.5, 0.5) },
     },
   });
   const fundo = new Mesh(new PlaneGeometry(2, 2), materialFundo);
@@ -149,13 +157,33 @@ export function iniciar() {
         uVelocidade: { value: 0 },
         uEixo: { value: opcoes.eixo },
         uCurva: { value: 0 },
+        uSombra: { value: 0 },
+        uCorte: { value: 0 },
+        uFace: { value: 0 },
+        uTamanho: { value: new Vector2(1, 1) },
+        uPose: { value: new Vector3() },
+        uFoco: { value: 1 },
       },
     });
     const mesh = new Mesh(geometria, material);
     mesh.visible = false;
     mesh.renderOrder = 1;
     cena.add(mesh);
-    const plano: Plano = { el, ancora: opcoes.ancora, img, mesh, material, textura: null, eixo: opcoes.eixo, pronto: false, cheia: 0, proporcao: 1 };
+    const face = el.closest<HTMLElement>(".tambor-face");
+    const plano: Plano = {
+      el,
+      ancora: opcoes.ancora,
+      img,
+      mesh,
+      material,
+      textura: null,
+      eixo: opcoes.eixo,
+      face,
+      espaco: face?.closest<HTMLElement>(".tambor") ?? null,
+      pronto: false,
+      cheia: 0,
+      proporcao: 1,
+    };
 
     carregarTextura(plano).catch(() => {});
     return plano;
@@ -357,17 +385,27 @@ export function iniciar() {
   }
 
   function posicionar(p: Plano) {
-    const caixa = p.el.getBoundingClientRect();
+    // A face do tambor mede o espaço da linha, que não gira; o giro vem da geometria do tambor.
+    const caixa = (p.espaco ?? p.el).getBoundingClientRect();
+    const giro = p.face ? pose(estado.faces.get(p.face) ?? 0, caixa.width) : null;
     const fora = caixa.bottom < -50 || caixa.top > altura + 50 || caixa.right < -50 || caixa.left > largura + 50;
-    const usar = ativo && p.pronto && !fora && !emAnimacao(p) && caixa.width > 1;
+    const escondida = giro ? !giro.visivel : false;
+    const usar = ativo && p.pronto && !fora && !escondida && !emAnimacao(p) && caixa.width > 1;
     p.mesh.visible = usar;
-    if (p.el.classList.contains("gl-pronto") !== (usar || (p.pronto && fora && ativo))) {
-      p.el.classList.toggle("gl-pronto", usar || (p.pronto && fora && ativo));
-    }
+    const guardaLugar = usar || (p.pronto && ativo && (fora || escondida));
+    if (p.el.classList.contains("gl-pronto") !== guardaLugar) p.el.classList.toggle("gl-pronto", guardaLugar);
     if (!usar) return;
 
     p.mesh.position.set(caixa.left + caixa.width / 2 - largura / 2, altura / 2 - (caixa.top + caixa.height / 2), 0);
     p.mesh.scale.set(caixa.width, caixa.height, 1);
+    const un = p.material.uniforms;
+    un.uFace.value = giro ? 1 : 0;
+    un.uSombra.value = giro?.sombra ?? 0;
+    if (giro) {
+      (un.uTamanho.value as Vector2).set(caixa.width, caixa.height);
+      (un.uPose.value as Vector3).set(giro.x, giro.z, giro.angulo);
+      un.uFoco.value = caixa.width * FOCO;
+    }
 
     // object-fit: cover, com a imagem presa no topo nos prints de celular
     const aspectoPlano = caixa.width / caixa.height;
@@ -400,8 +438,10 @@ export function iniciar() {
   // mandaria dezenas de eventos por quadro e o rastro ficaria enorme.
   let ultimo: { x: number; y: number } | null = null;
   let pendente: { x: number; y: number; dx: number; dy: number } | null = null;
+  const ponteiro = new Vector2(0.5, 0.5);
   function mexer(x: number, y: number) {
     abismo.seguir(x - largura / 2, altura / 2 - y);
+    ponteiro.set(x / largura, 1 - y / altura);
     if (ultimo) {
       const dx = (x - ultimo.x) / largura;
       const dy = (ultimo.y - y) / altura;
@@ -456,6 +496,11 @@ export function iniciar() {
     materialFundo.uniforms.uTinta.value = fluido.texturaTinta;
     materialFundo.uniforms.uTempo.value = tempo;
     materialFundo.uniforms.uProfundidade.value = profundidade.valor;
+    (materialFundo.uniforms.uPonteiro.value as Vector2).lerp(ponteiro, 0.12);
+
+    // A coluna da home passa por baixo do cabeçalho fixo sem cobrir os links dele.
+    const cabecalho = document.querySelector<HTMLElement>("body > header");
+    const corte = Math.max(0, (cabecalho?.getBoundingClientRect().bottom ?? 0) + 12) * (resolucao.y / Math.max(1, altura));
 
     const curva = Math.min(1, Math.max(0, profundidade.valor) * 0.55);
     for (const p of planos) {
@@ -468,6 +513,7 @@ export function iniciar() {
       u.uProfundidade.value = profundidade.valor;
       u.uVelocidade.value = p.eixo === 0 ? estado.rolagem : estado.carrossel;
       u.uCurva.value = p.eixo === 1 ? curva : 0;
+      u.uCorte.value = p.face ? corte : 0;
       // o nome do projeto no índice enche a foto de cor
       p.cheia += ((p.el.dataset.cheia === "1" ? 1 : 0) - p.cheia) * 0.06;
       u.uCheia.value = p.cheia;

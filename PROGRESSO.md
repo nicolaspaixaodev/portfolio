@@ -155,7 +155,8 @@ A licença não pôde ser conferida (a página do Fab responde 403 sem login). O
 | 5.6 | Deploy, roadmap R05, memória | **roadmap R05 publicado** (13/09/2026) |
 | 5.7 | Casos de borda com as novidades | **feito**: movimento reduzido, sem WebGL, celular no Abismo, EN, 404. Bug corrigido: depois da navegação, `profundidade.ts` lia `data-depth` já resetado pelo roteador; agora lê o localStorage |
 | 5.8 | Git e GitHub | **feito**: https://github.com/nicolaspaixaodev/portfolio (público, branch `main`). Autor Nicolas e **sem** Co-Authored-By (pedido dele, na memória). `.impeccable/review/` e `public/modelos/*.glb` ficam fora do Git (peso e licença); o README explica como repor os modelos. Deploy continua pela CLI (`npx vercel deploy --prod`), sem integração Git na Vercel |
-| 5.9 | Revisão independente das mudanças novas (Abismo, textos, carrosséis) | **em andamento** |
+| 5.9 | Revisão independente das mudanças novas (Abismo, textos, carrosséis) | **disposição `fix`** (13/09/2026), 6 correções, todas aplicadas (ver "Tambor de serviços e correções da 5.9") |
+| 5.10 | Tambor de serviços na home (pedido do Nicolas com rascunho) | **feito**, aguardando nova revisão |
 
 **Lighthouse depois das correções (no ar):** celular 98/100/100/100 (TBT 10 ms, LCP 2,1 s).
 
@@ -190,3 +191,34 @@ Pendências do Nicolas:
 - Aprovar a linha embaixo do nome.
 - Reescrever o Sobre junto comigo.
 - Escolher o domínio.
+
+## Tambor de serviços e correções da 5.9 (13/09/2026)
+
+**Pedido do Nicolas:** uma seção que seja a porta de entrada dos serviços, com 4 abas fixas (Creative & Immersive, E-commerce, SaaS, Landing Pages). O giro precisa ser natural e fluido, pelas setas, conforme o rascunho no tablet: colunas de 3 cards com faces inclinadas dos lados. Na home, só a capa de cada projeto, e prévias ("Projeto prévia 1, 2...") onde falta projeto.
+
+**Decisões tomadas por mim (avisadas ao Nicolas):**
+- A Loja Cozinha Autoral fica em **E-commerce**, porque tem carrinho, adicionais, cupom e fechamento do pedido.
+- O tambor substitui a coluna de capas e o índice de projetos da home.
+- A home abre no primeiro serviço que tem projeto (E-commerce) e lembra o último escolhido (`sessionStorage`).
+- As prévias são imagens escuras com "Projeto prévia N / Em breve", uma por língua, em `src/assets/previas/`, com origem embutida.
+
+**Como funciona:**
+- `src/data/servicos.ts`: nome e texto de cada serviço. O campo `categoria` do projeto diz a face.
+- `src/scripts/tambor.ts`: a geometria. Em repouso, a face da frente fica chapada e as vizinhas ficam a 68°. Girando, a face dobra pela quina.
+  - **Perspectiva própria por linha** (foco = 2,2 larguras): com a câmera única no centro da tela, a fresta da direita ficava escondida atrás da face da frente.
+  - No WebGL, os vértices da face andam no shader (`uFace`, `uPose`, `uFoco`) com o plano em z = 0.
+  - No CSS, `perspective` e `transform` da face usam as mesmas contas.
+- `Inicio.astro`:
+  - Cada linha é um tween GSAP (`power3.inOut`, 1,2 s, cascata de 85 ms por linha).
+  - Controles: setas do painel, lista, teclado ←/→, arrasto no toque, trackpad lateral e clique na fresta.
+  - Só a face da frente fica focável (`inert` nas outras) e leva o `view-transition-name`.
+  - A legenda troca junto, e um `aria-live` anuncia o serviço.
+
+**Correções da revisão 5.9:**
+1. **Coluna cobrindo o cabeçalho:** os planos somem suaves logo abaixo dele (`uCorte`). As legendas somem ao encostar, e sem WebGL o cabeçalho ganha fundo.
+2. **Atum:** `renderOrder` 1,5. Passa por cima dos prints e fica embaixo do texto; os tubarões continuam atrás.
+3. **Foto sob a pincelada no Fundo e no Abismo:** comprovada com `?tinta-parada`, um parâmetro de depuração que zera a dissipação da tinta.
+4. **Contrato:** registra o Abismo, a pincelada que inverte, a roda no carrossel e o tambor. O FORM lista as 4 profundidades. **Falta** regerar o DESIGN.md.
+5. **Rótulos na descida:** com `:root.descendo`, `--fg-2` vira tinta.
+6. **Partículas:** viraram neve marinha, com flocos irregulares em 3 camadas, desfoque por distância e deriva. A lanterna do ponteiro (`uPonteiro`) acende os flocos por perto e deixa um halo fraco.
+

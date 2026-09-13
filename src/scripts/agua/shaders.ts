@@ -44,6 +44,10 @@ export const VERTICE_IMAGEM = /* glsl */ `
   uniform float uVelocidade;
   uniform float uEixo;
   uniform float uCurva;
+  uniform float uFace;
+  uniform vec2 uTamanho;
+  uniform vec3 uPose;
+  uniform float uFoco;
   varying vec2 vUv;
 
   void main() {
@@ -66,6 +70,18 @@ export const VERTICE_IMAGEM = /* glsl */ `
     // Embaixo d'água o carrossel se curva por dentro de um cilindro: as bordas vêm pra frente.
     mundo.z += uCurva * xTela * xTela * uViewport.x * 0.24;
 
+    // Face do tambor da home: gira no próprio eixo com a perspectiva centrada na linha
+    // (uPose = x, z, ângulo). O plano continua chapado em z = 0; só os vértices andam.
+    if (uFace > 0.5) {
+      vec2 v = p.xy * uTamanho;
+      float c = cos(uPose.z);
+      float s = sin(uPose.z);
+      vec3 r = vec3(v.x * c + uPose.x, v.y, -v.x * s + uPose.y);
+      float k = uFoco / (uFoco - r.z);
+      vec4 centro = modelMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+      mundo = vec4(centro.xy + r.xy * k, 0.0, 1.0);
+    }
+
     gl_Position = projectionMatrix * viewMatrix * mundo;
   }
 `;
@@ -81,6 +97,8 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
   uniform float uProfundidade;
   uniform float uSempreCor;
   uniform float uCheia;
+  uniform float uSombra;
+  uniform float uCorte;
   varying vec2 vUv;
 
   ${RUIDO}
@@ -134,7 +152,15 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     final *= mix(1.0, 0.78, abismo * (1.0 - revela));
     final = mix(final, mix(pb, cor, mistura), revela * profundo);
 
-    gl_FragColor = vec4(final, 1.0);
+    // Face do tambor virando: escurece conforme sai de frente.
+    final *= 1.0 - uSombra * 0.7;
+
+    // Some suave logo abaixo do cabeçalho fixo (uCorte em px da tela, de cima).
+    float topo = uResolucao.y - uCorte;
+    float visivel = 1.0 - smoothstep(topo - 28.0, topo, gl_FragCoord.y) * step(0.5, uCorte);
+    if (visivel < 0.002) discard;
+
+    gl_FragColor = vec4(final, visivel);
   }
 `;
 
@@ -196,6 +222,7 @@ export const FRAGMENTO_FUNDO = /* glsl */ `
   uniform vec2 uResolucao;
   uniform float uTempo;
   uniform float uProfundidade;
+  uniform vec2 uPonteiro;
   varying vec2 vUv;
 
   ${RUIDO}
@@ -240,15 +267,39 @@ export const FRAGMENTO_FUNDO = /* glsl */ `
     // Logo abaixo da superfície a água é mais clara.
     base += vec3(0.94, 1.0, 0.97) * smoothstep(l - 0.18, l, vUv.y) * agua * subindo * 0.18;
 
-    // Partículas em suspensão: sobem quando você desce.
-    vec2 g = vec2(vUv.x * uResolucao.x / uResolucao.y, vUv.y + uProfundidade * 0.85 + uTempo * 0.006) * 24.0;
-    vec2 id = floor(g);
-    vec2 f = fract(g) - 0.5 - (vec2(hash(id + 3.1), hash(id + 7.7)) - 0.5) * 0.6;
-    float particula = step(0.9, hash(id)) * smoothstep(0.09, 0.0, length(f));
-    // No abismo as partículas viram neve marinha e, algumas, bioluminescência.
-    float cintila = 0.5 + 0.5 * sin(uTempo * 1.7 + hash(id) * 40.0);
-    vec3 corParticula = mix(vec3(0.94, 1.0, 0.97), vec3(0.45, 1.0, 0.88), step(0.97, hash(id + 1.3)) * abismo);
-    base += corParticula * particula * (0.08 + fundo * 0.1 + abismo * 0.12 * cintila) * agua;
+    // Neve marinha: três camadas de flocos irregulares. A de perto é grande e
+    // desfocada, a do meio é nítida, a de longe é miúda. Afundam devagar,
+    // balançam de lado e sobem quando você desce.
+    float aspecto = uResolucao.x / uResolucao.y;
+    vec2 ponteiro = (vUv - uPonteiro) * vec2(aspecto, 1.0);
+    float lanterna = exp(-dot(ponteiro, ponteiro) * 14.0) * abismo;
+    float neve = 0.0;
+    for (int i = 0; i < 3; i++) {
+      float fi = float(i);
+      float escala = 9.0 + fi * 11.0;
+      float perto = 1.0 - fi * 0.5;
+      vec2 q = vec2(vUv.x * aspecto, vUv.y) * escala;
+      q.y += (uProfundidade * (0.5 + perto * 0.6) + uTempo * (0.012 + perto * 0.018)) * escala;
+      q.x += sin(uTempo * (0.21 + fi * 0.07) + q.y * 0.35 + fi * 2.0) * 0.28;
+      vec2 id = floor(q);
+      float h = hash(id + fi * 19.7);
+      if (h < 0.78 + fi * 0.05) continue;
+      vec2 f = fract(q) - 0.5 - (vec2(hash(id + 3.1), hash(id + 7.7)) - 0.5) * 0.55;
+      float giro = hash(id + 11.3) * 6.2832;
+      f = mat2(cos(giro), -sin(giro), sin(giro), cos(giro)) * f;
+      f.x *= mix(1.0, 1.6, hash(id + 5.9));
+      float raio = mix(0.025, 0.12, pow(hash(id + 2.3), 2.0)) * mix(0.6, 1.2, perto);
+      float ang = atan(f.y, f.x);
+      float irregular = 1.0 + 0.14 * sin(ang * 2.0 + h * 40.0) + 0.08 * sin(ang * 5.0 + h * 17.0);
+      float borda = raio * (0.35 + perto * perto * 0.9) + 0.012;
+      float floco = 1.0 - smoothstep(raio * irregular - borda, raio * irregular + borda, length(f));
+      neve += floco * mix(0.35, 1.0, perto * (1.0 - perto) * 4.0 + (1.0 - perto) * 0.15);
+    }
+    float cintila = 0.6 + 0.4 * sin(uTempo * 1.3 + vUv.x * 40.0);
+    vec3 corNeve = mix(vec3(0.94, 1.0, 0.97), vec3(0.6, 1.0, 0.9), abismo * 0.5);
+    base += corNeve * neve * (0.07 + fundo * 0.08 + abismo * (0.05 + 0.1 * cintila) + lanterna * 0.55) * agua;
+    // A lanterna do ponteiro: um halo frio e fraco na água escura.
+    base += vec3(0.37, 0.95, 0.86) * lanterna * 0.045 * agua;
 
     // Embaixo d'água, o rastro do mouse deixa passar mais luz; no abismo, vira trilha bioluminescente.
     base += vec3(0.94, 1.0, 0.97) * rasgo * agua * 0.1 * (1.0 - abismo);

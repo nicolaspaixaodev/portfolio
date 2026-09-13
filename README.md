@@ -26,6 +26,7 @@ A pasta já está ligada ao projeto `nicolas-paixao` na Vercel.
 | O quê | Onde |
 | --- | --- |
 | Projetos | `src/content/projetos/*.md` (um arquivo por projeto) |
+| Serviços do tambor da home (nome e texto) | `src/data/servicos.ts` |
 | Prints dos projetos | `src/assets/projetos/<projeto>/` |
 | Texto e foto do Sobre | `src/data/sobre.ts` |
 | E-mail e WhatsApp | `src/data/site.ts` |
@@ -34,10 +35,15 @@ A pasta já está ligada ao projeto `nicolas-paixao` na Vercel.
 ### Adicionar um projeto
 
 1. Crie `src/content/projetos/<id>.md` copiando o formato de `loja-cardapio.md`.
-2. Coloque os prints em `src/assets/projetos/<id>/`.
-3. Use `ordem` para definir a posição no índice.
+2. Em `categoria`, diga em qual face do tambor ele entra: `criativo`, `ecommerce`, `saas` ou `landing`.
+3. Coloque os prints em `src/assets/projetos/<id>/`. A capa vai pro tambor da home, e a galeria inteira vai pro carrossel da página do projeto.
+4. Use `ordem` para definir a posição dentro do serviço.
 
-As rotas `/projetos/<id>/` e `/en/projects/<id>/` são geradas sozinhas. A coluna da home passa a mostrar só as capas quando houver 4 projetos ou mais.
+As rotas `/projetos/<id>/` e `/en/projects/<id>/` são geradas sozinhas. Cada projeto novo ocupa o lugar de uma prévia ("Projeto prévia N") no serviço dele. Cada tambor tem pelo menos 3 linhas, e ganha mais quando um serviço passa de 3 projetos.
+
+## Tambor de serviços
+
+A home tem um tambor com 4 faces por linha, uma por serviço: Creative & Immersive, E-commerce, SaaS e Landing Pages. Ele gira pelas setas do painel "Serviços", pela lista, pelas setas do teclado, pelo arrasto pro lado no toque ou pelo clique na fresta de uma face vizinha. A home abre no primeiro serviço que tem projeto, e volta no último escolhido. A geometria fica em `src/scripts/tambor.ts`, e o CSS (sem WebGL) e a água usam as mesmas contas.
 
 ### Tirar um projeto
 

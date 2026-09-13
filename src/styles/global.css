@@ -31,6 +31,11 @@
   color-scheme: light;
 }
 
+/* Enquanto a água sobe pela página, os rótulos pegam a tinta cheia, como os valores ao lado */
+:root.descendo {
+  --fg-2: var(--tinta);
+}
+
 :root[data-depth="raso"] .rotulo {
   font-weight: 600;
 }
@@ -401,5 +406,13 @@ main {
   *::after {
     transition-duration: 1ms !important;
     animation-duration: 1ms !important;
+  }
+}
+
+/* Sem água, o cabeçalho fixo do desktop tapa a coluna que rola por baixo dele */
+@media (min-width: 1024px) {
+  :root.sem-agua body > header {
+    background: var(--bg);
+    padding-bottom: 0.75rem;
   }
 }

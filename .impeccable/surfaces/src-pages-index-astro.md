@@ -31,9 +31,9 @@ OWN-WORLD: Na superfície, sol #F6F8F7 e tinta #0B1F24. Embaixo, verde-mar #1FA3
 
 STORY: O visitante vê um site vivo e caprichado. Em segundos entende quem é Nicolas, creative developer em Aracaju, e o que ele fez. Mergulha por curiosidade, testa o Loja, pensa "quero um desses" e chama no WhatsApp.
 
-FIRST VIEWPORT: No desktop, NICOLAS PAIXÃO em Anybody expandida ocupa uns 45% da largura à esquerda, com uma linha de posicionamento embaixo, e as letras afinam perto do mouse. À direita, uma coluna com uma capa por projeto, em preto e branco com granulado, que ganha cor sob o mouse. Os outros prints ficam no carrossel da página do projeto. No topo ficam o nome pequeno, PT/EN, Sobre e o controle Superfície/Mergulhar com a linha d'água amarela. O índice de projetos fica à direita. No rodapé, o e-mail (clique copia) e o WhatsApp como ação amarela. No celular, o nome em duas linhas, o print embaixo e o WhatsApp fixo. Assinatura: ao mergulhar, a linha d'água sobe e a água cobre a página (onda 2D real na GPU). Ponteiro e dedo ondulam a superfície, cáusticas deslizam sobre prints e texto, e na página de projeto os prints se curvam em arco sob a água. Movimento como água rasa: lento, ondulado, refratado, sem pulo nem quique.
+FIRST VIEWPORT: No desktop, NICOLAS PAIXÃO em Anybody expandida ocupa uns 45% da largura à esquerda, com uma linha de posicionamento embaixo, e as letras afinam perto do mouse. À direita, uma coluna com uma capa por projeto, em preto e branco com granulado, que ganha cor sob o mouse (desde 13/09/2026, organizada no tambor de serviços; ver exceções). Os outros prints ficam no carrossel da página do projeto. No topo ficam o nome pequeno, PT/EN, Sobre e o controle Superfície/Mergulhar com a linha d'água amarela. O índice de projetos fica à direita. No rodapé, o e-mail (clique copia) e o WhatsApp como ação amarela. No celular, o nome em duas linhas, o print embaixo e o WhatsApp fixo. Assinatura: ao mergulhar, a linha d'água sobe e a água cobre a página (onda 2D real na GPU). Ponteiro e dedo ondulam a superfície, cáusticas deslizam sobre prints e texto, e na página de projeto os prints se curvam em arco sob a água. Movimento como água rasa: lento, ondulado, refratado, sem pulo nem quique.
 
-FORM: Mar raso ao meio-dia, posição 7 da lista ordenada (luz atravessando o mar raso), seed 60d9d26b. Elevações: fluido com física real (bacia de tinta); cor presa nos prints (léxico); profundidades nomeadas e linkáveis Superfície/Raso/Fundo com equivalente em texto (ciclorama); linha d'água sempre indica onde você está (sequenciador); grade e índice reconhecíveis sob a refração (cidade que dobra).
+FORM: Mar raso ao meio-dia, posição 7 da lista ordenada (luz atravessando o mar raso), seed 60d9d26b. Elevações: fluido com física real (bacia de tinta); cor presa nos prints (léxico); profundidades nomeadas e linkáveis Superfície/Raso/Fundo/Abismo com equivalente em texto (ciclorama; a lanterna do topo leva ao Abismo, com rótulo "Abismo (modo escuro)"); linha d'água sempre indica onde você está (sequenciador); grade e índice reconhecíveis sob a refração (cidade que dobra).
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
@@ -41,7 +41,19 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - **Carrossel da página do projeto em cor cheia na superfície.** Ele mandou o print da página PayJustNow do segerman.dev, com os prints coloridos, e pediu: "perceba que tem carrosel, é ai que voce coloca todos os print [...] copia o que ele fez". O preto e branco com granulado vale para as capas (home, próximo projeto); o carrossel mostra o trabalho em cor.
 - **Topo da home com "Creative developer em Aracaju" no lugar do nome pequeno.** Na referência, o nome é pequeno e o título gigante é a função. Aqui o título gigante é o nome, então o topo leva a função, pra não repetir o nome duas vezes na mesma tela.
-- **Capa da home em recorte 4:5 enquanto houver menos de 3 projetos**, pra primeira tela não ficar vazia ("vazio/minimalista demais" é anti-referência dele). A partir do 3º projeto, as capas voltam a 16:10.
+- **Abismo, o modo escuro (13/09/2026).** Ele mandou prints do modo escuro do segerman.dev e pediu o mesmo, "so que ai, no modo escuro vai ser mar ainda, so que o mar muito profundo, ai voce bota meio que uns peixes 3d". A exceção à THESIS ("recusa fundo escuro") vale só nessa quarta profundidade, que continua sendo o mesmo mar.
+  - Fundo #04151B.
+  - Neve marinha: flocos irregulares em três camadas, com desfoque por distância.
+  - Lanterna: halo frio no ponteiro, que acende os flocos por perto.
+  - Modelos 3D do Fab, com créditos no Sobre. Um atum estilizado verde-mar segue o ponteiro de nariz, sem dar ré, por cima dos prints e por baixo do texto. Tubarões apagados cruzam a névoa atrás de tudo.
+- **A pincelada no Fundo e no Abismo abre uma janela pra superfície (13/09/2026).** Pedido: "que o texto quando o mouse passa inverte a cor mostrando o fundo normal". Dentro do rastro aparecem o sol, o texto em tinta com franja amarela e verde-mar, e os prints em preto e branco com granulado. O botão do WhatsApp continua em DOM, amarelo.
+- **Carrossel do projeto na roda do mouse (13/09/2026).** Pedido: "identico ao do segerman", "sem carrossel infinito". A roda anda o trilho horizontal até o fim, e só depois a água sobe.
+- **Tambor de serviços no lugar da coluna da home (13/09/2026).** Pedido: "uma seção de destaque [...] a porta de entrada principal pros clientes entenderem os serviços", com rascunho desenhado no tablet. Substitui a coluna de capas e o índice de projetos do FIRST VIEWPORT.
+  - Cada linha é um prisma de 4 faces: Creative & Immersive, E-commerce, SaaS e Landing Pages. As faces vizinhas aparecem como frestas inclinadas dos dois lados.
+  - O giro sai das setas (painel "Serviços" à direita), da lista, das setas do teclado, do arrasto no toque e do clique numa fresta. As linhas giram em cascata e o ciclo volta ao primeiro serviço.
+  - Cada face mostra só a capa de um projeto, com nome, tipo e ano embaixo. Onde falta projeto, entra uma prévia escura ("Projeto prévia N / Em breve"), que sai quando o projeto chega.
+  - A home abre no primeiro serviço que tem projeto de verdade: hoje, E-commerce, com a Loja Cozinha Autoral.
+  - A regra da cor presa nos prints continua valendo nas faces.
 
 ## Decisões em aberto
 
