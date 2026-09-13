@@ -3,7 +3,7 @@
 Diário de obra do portfólio. Serve para retomar o trabalho se a sessão cair ou o limite de uso acabar. Diga "continua a fase 4" e comece por aqui.
 
 - **No ar:** https://nicolaspaixao.com.br (depois que o DNS propagar) e https://nicolas-paixao.vercel.app
-- **Domínio:** `nicolaspaixao.com.br` e `www.` foram adicionados ao projeto Vercel em 13/09/2026. Em 13/09/2026 o Nicolas trocou os servidores DNS no Registro.br para `ns1.vercel-dns.com` e `ns2.vercel-dns.com`. O Registro.br avisou que a delegação leva uns 2 h. Para conferir: `npx vercel domains inspect nicolaspaixao.com.br` (os nameservers devem aparecer com ✓).
+- **Domínio:** `nicolaspaixao.com.br` e `www.` foram adicionados ao projeto Vercel em 13/09/2026. Em 13/09/2026 o Nicolas trocou os servidores DNS no Registro.br para `ns1.vercel-dns.com` e `ns2.vercel-dns.com`. A delegação propagou no mesmo dia: os nameservers aparecem com ✓ e o site responde 200 em https://nicolaspaixao.com.br. O `www` redireciona com 308 para o domínio principal, mantendo o caminho. Esse redirecionamento está na configuração do domínio na Vercel (`npx vercel api /v9/projects/nicolas-paixao/domains/www.nicolaspaixao.com.br`), e não num `vercel.json`, porque a regra `has: host` no `vercel.json` não teve efeito neste projeto.
 - **Roadmap:** https://claude.ai/code/artifact/2de38f5b-2cd1-467e-8b95-f442e204f10c
 - **Contrato de design:** `.impeccable/surfaces/src-pages-index-astro.md`
 
@@ -154,7 +154,7 @@ A licença não pôde ser conferida (a página do Fab responde 403 sem login). O
 | 5.5 | `DESIGN.md` pelo `impeccable-documenter` | feito uma vez (antes do Abismo). **Regenerar** depois da revisão das mudanças novas |
 | 5.6 | Deploy, roadmap R05, memória | **roadmap R05 publicado** (13/09/2026) |
 | 5.7 | Casos de borda com as novidades | **feito**: movimento reduzido, sem WebGL, celular no Abismo, EN, 404. Bug corrigido: depois da navegação, `profundidade.ts` lia `data-depth` já resetado pelo roteador; agora lê o localStorage |
-| 5.8 | Git e GitHub | repositório local com 2 commits, autor Nicolas e **sem** Co-Authored-By (pedido dele, na memória). `.impeccable/review/` e `public/modelos/*.glb` ficam fora do Git (peso e licença). **Falta** o repositório no GitHub: não há `gh`, então o Nicolas cria `nicolaspaixaodev/portfolio` vazio em github.com/new e eu faço o push |
+| 5.8 | Git e GitHub | **feito**: https://github.com/nicolaspaixaodev/portfolio (público, branch `main`). Autor Nicolas e **sem** Co-Authored-By (pedido dele, na memória). `.impeccable/review/` e `public/modelos/*.glb` ficam fora do Git (peso e licença); o README explica como repor os modelos. Deploy continua pela CLI (`npx vercel deploy --prod`), sem integração Git na Vercel |
 | 5.9 | Revisão independente das mudanças novas (Abismo, textos, carrosséis) | **em andamento** |
 
 **Lighthouse depois das correções (no ar):** celular 98/100/100/100 (TBT 10 ms, LCP 2,1 s).
