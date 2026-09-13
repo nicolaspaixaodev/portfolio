@@ -217,7 +217,7 @@ Pendências do Nicolas:
 
 **Correções da revisão 5.9:**
 1. **Coluna cobrindo o cabeçalho:** os planos somem suaves logo abaixo dele (`uCorte`). As legendas somem ao encostar, e sem WebGL o cabeçalho ganha fundo.
-2. **Atum:** `renderOrder` 1,5. Passa por cima dos prints e fica embaixo do texto; os tubarões continuam atrás.
+2. **Atum:** a revisão pediu `renderOrder` 1,5, com o atum passando por cima dos prints. **Revertido a pedido do Nicolas (13/09/2026):** "não pode passar na frente das demonstrações, ele é uma coisa que fica no fundo". Agora o atum fica atrás dos prints e do texto, como os tubarões.
 3. **Foto sob a pincelada no Fundo e no Abismo:** comprovada com `?tinta-parada`, um parâmetro de depuração que zera a dissipação da tinta.
 4. **Contrato:** registra o Abismo, a pincelada que inverte, a roda no carrossel e o tambor. O FORM lista as 4 profundidades. **Falta** regerar o DESIGN.md.
 5. **Rótulos na descida:** com `:root.descendo`, `--fg-2` vira tinta.

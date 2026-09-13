@@ -45,7 +45,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   - Fundo #04151B.
   - Neve marinha: flocos irregulares em três camadas, com desfoque por distância.
   - Lanterna: halo frio no ponteiro, que acende os flocos por perto.
-  - Modelos 3D do Fab, com créditos no Sobre. Um atum estilizado verde-mar segue o ponteiro de nariz, sem dar ré, por cima dos prints e por baixo do texto. Tubarões apagados cruzam a névoa atrás de tudo.
+  - Modelos 3D do Fab, com créditos no Sobre. Um atum estilizado verde-mar segue o ponteiro de nariz, sem dar ré. Tubarões apagados cruzam a névoa. Os peixes ficam **atrás** dos prints e do texto: o Nicolas pediu em 13/09/2026 que o atum "não pode passar na frente das demonstrações, ele é uma coisa que fica no fundo".
 - **A pincelada no Fundo e no Abismo abre uma janela pra superfície (13/09/2026).** Pedido: "que o texto quando o mouse passa inverte a cor mostrando o fundo normal". Dentro do rastro aparecem o sol, o texto em tinta com franja amarela e verde-mar, e os prints em preto e branco com granulado. O botão do WhatsApp continua em DOM, amarelo.
 - **Carrossel do projeto na roda do mouse (13/09/2026).** Pedido: "identico ao do segerman", "sem carrossel infinito". A roda anda o trilho horizontal até o fim, e só depois a água sobe.
 - **Tambor de serviços no lugar da coluna da home (13/09/2026).** Pedido: "uma seção de destaque [...] a porta de entrada principal pros clientes entenderem os serviços", com rascunho desenhado no tablet. Substitui a coluna de capas e o índice de projetos do FIRST VIEWPORT.

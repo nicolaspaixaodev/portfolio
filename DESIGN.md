@@ -235,7 +235,7 @@ A areia molhada (#C9B48A) do contrato de direção continua declarada como `--ar
 
 Não há sombras nem camadas levantadas. A profundidade é literal: quatro níveis de água, trocados por cor de fundo e, com WebGL, por uma superfície que sobe pela tela. O conteúdo fica sempre no mesmo plano (`main` no z-index 2). O canvas da água fica atrás dele (z-index 1, sem receber ponteiro). A onda do rodapé fica no nível do canvas, abaixo do conteúdo.
 
-Dentro do canvas, a ordem de desenho é fixa: a água ao fundo (−1), os tubarões na névoa, os prints (1), o atum (1.5), os títulos (2) e a camada de textos (3). O atum passa por cima do trabalho e fica embaixo de qualquer letra.
+Dentro do canvas, a ordem de desenho é fixa: a água ao fundo (−1), os tubarões na névoa, o atum, os prints (1), os títulos (2) e a camada de textos (3). Os peixes ficam atrás do trabalho e de qualquer letra: aparecem nos espaços livres e somem atrás das capas e dos prints.
 
 Dentro da água, a profundidade vem da luz: cáusticas contidas (intensidade 0.1, reduzidas no Fundo e apagadas no Abismo), neve marinha em três camadas, feixes de luz só no Fundo e uma faixa mais clara logo abaixo da linha d'água enquanto ela sobe. Embaixo d'água, os prints ganham uma tinta verde (de 28% a 48%) e cáusticas por cima. No Abismo, os prints caem para 78% de luz, como se iluminados de perto.
 
@@ -246,7 +246,7 @@ O tambor da home é a única peça com volume. As faces giram em perspectiva, e 
 
 **A Regra do Plano Único.** Nada flutua sobre nada. Não use sombra, painel translúcido ou cartão para separar conteúdo. Quem separa é o espaço, o fio ou a água. O giro do tambor é geometria, não camada.
 
-**A Regra do Peixe Sob a Letra.** Toda vida 3D do Abismo fica abaixo do texto. O atum pode cruzar os prints, os tubarões ficam atrás de tudo, e nenhum dos dois cobre uma palavra.
+**A Regra do Peixe no Fundo.** Toda vida 3D do Abismo fica atrás do trabalho e do texto. O atum e os tubarões nunca cobrem uma capa, um print ou uma palavra, porque o cliente precisa ver as demonstrações. Pedido do Nicolas em 13/09/2026.
 
 ## Shapes
 

@@ -207,11 +207,8 @@ export function criarAbismo(cena: Scene) {
 
       // Atum: no arquivo, nariz em +Z e dorso em +Y. Visual estilizado, não realista.
       estilizarAtum(modeloAtum.cena);
-      // O atum nada entre os prints (renderOrder 1) e os títulos (2): passa por cima do
-      // trabalho e continua embaixo do texto. Os tubarões ficam no fundo, atrás de tudo.
-      modeloAtum.cena.traverse((o) => {
-        if ((o as Mesh).isMesh) o.renderOrder = 1.5;
-      });
+      // Como os tubarões, o atum mora no fundo: fica atrás dos prints (renderOrder 1) e do texto,
+      // pra nunca tapar o trabalho. Pedido do Nicolas em 13/09/2026.
       const raiz = new Group();
       raiz.add(montarSuporte(modeloAtum.cena, 170, (g) => (g.rotation.y = Math.PI / 2)));
       const mixer = new AnimationMixer(modeloAtum.cena);

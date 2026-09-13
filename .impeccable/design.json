@@ -475,7 +475,7 @@
       "requisito": "WebGL2, com o módulo carregado por import dinâmico depois da camada clara.",
       "carga": "Mouse: requestIdleCallback (timeout de 1500ms). Toque: primeiro pointerdown, touchstart, wheel, scroll ou keydown, ou 6s.",
       "canvas": "Um só, fixo, com z-index 1, pointer-events none e persistente entre páginas. DPR máximo de 1.75 (2 na textura do nome).",
-      "ordemDeDesenho": "água -1, tubarões na névoa, prints 1, atum 1.5, títulos 2, camada de textos 3.",
+      "ordemDeDesenho": "água -1, tubarões na névoa e atum (0), prints 1, títulos 2, camada de textos 3.",
       "fluido": "Stable fluids com grade de velocidade 112, grade de tinta 384, 14 iterações de pressão e vorticidade. Um respingo por quadro, com tinta de 0.05 a 0.32 pela rapidez. Para 3.5s depois do último respingo.",
       "rasgo": "smoothstep(0.06, 0.11) na tinta, espuma clara entre 0.03 e 0.1, separação cromática de 0.0008 e refração pelo fluxo.",
       "imagens": "Luminância mapeada de tinta a sol, com granulado a 24 quadros. Cor onde rasga, embaixo d'água e no carrossel (sempre). A partir de 1.5, a pincelada devolve o preto e branco. No Abismo, 78% de luz fora do rasgo.",
@@ -685,8 +685,8 @@
         "section": "elevation"
       },
       {
-        "name": "A Regra do Peixe Sob a Letra",
-        "body": "Toda vida 3D do Abismo fica abaixo do texto. O atum pode cruzar os prints, os tubarões ficam atrás de tudo, e nenhum dos dois cobre uma palavra.",
+        "name": "A Regra do Peixe no Fundo",
+        "body": "Toda vida 3D do Abismo fica atrás do trabalho e do texto. O atum e os tubarões nunca cobrem uma capa, um print ou uma palavra, porque o cliente precisa ver as demonstrações. Pedido do Nicolas em 13/09/2026.",
         "section": "elevation"
       }
     ],
