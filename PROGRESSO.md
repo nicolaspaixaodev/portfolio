@@ -151,8 +151,11 @@ A licença não pôde ser conferida (a página do Fab responde 403 sem login). O
 | 5.2 | Correções: acessibilidade, desempenho, SEO (sitemap, robots, JSON-LD, OG) | **feito**: no celular a água acorda no 1º toque (ou em 6 s); o fluido para 3,5 s depois do último movimento; `og-pt.jpg`/`og-en.jpg`, `apple-touch-icon.png`, `robots.txt`, `sitemap.xml` com hreflang, JSON-LD Person; controle de profundidade some sem JS |
 | 5.3 | Revisão dos textos PT/EN | **feito**, sem mudança necessária; a linha embaixo do nome e o Sobre continuam pendentes de aprovação |
 | 5.4 | Revisão independente (`impeccable-finish-reviewer`) e correções | **feito: disposição `ship`** (13/09/2026) depois de 4 rodadas. A última corrigiu a linha d'água, que riscava o rodapé: agora fica abaixo dele, e os rodapés subiram para 2rem. As 10 imagens publicadas têm a origem embutida (`embed-prompt --scan`: 0 faltando) |
-| 5.5 | `DESIGN.md` pelo `impeccable-documenter` | **em andamento** |
-| 5.6 | Deploy, roadmap R05, memória | a fazer |
+| 5.5 | `DESIGN.md` pelo `impeccable-documenter` | feito uma vez (antes do Abismo). **Regenerar** depois da revisão das mudanças novas |
+| 5.6 | Deploy, roadmap R05, memória | **roadmap R05 publicado** (13/09/2026) |
+| 5.7 | Casos de borda com as novidades | **feito**: movimento reduzido, sem WebGL, celular no Abismo, EN, 404. Bug corrigido: depois da navegação, `profundidade.ts` lia `data-depth` já resetado pelo roteador; agora lê o localStorage |
+| 5.8 | Git e GitHub | repositório local com 2 commits, autor Nicolas e **sem** Co-Authored-By (pedido dele, na memória). `.impeccable/review/` e `public/modelos/*.glb` ficam fora do Git (peso e licença). **Falta** o repositório no GitHub: não há `gh`, então o Nicolas cria `nicolaspaixaodev/portfolio` vazio em github.com/new e eu faço o push |
+| 5.9 | Revisão independente das mudanças novas (Abismo, textos, carrosséis) | **em andamento** |
 
 **Lighthouse depois das correções (no ar):** celular 98/100/100/100 (TBT 10 ms, LCP 2,1 s).
 
