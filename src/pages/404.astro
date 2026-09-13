@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import { rotas, textos } from "../i18n/ui";
+const t = textos("pt");
+const en = textos("en");
+---
+
+<Base lang="pt" pagina="erro" titulo="Página não encontrada · Nicolas Paixão" alternativo={rotas.inicio.en}>
+  <section class="erro">
+    <h1 class="display">404</h1>
+    <p>{t.naoEncontrada} <a class="link" href={rotas.inicio.pt}>{t.voltarInicio}</a></p>
+    <p lang="en">{en.naoEncontrada} <a class="link" href={rotas.inicio.en}>{en.voltarInicio}</a></p>
+  </section>
+</Base>
+
+<style>
+  .erro {
+    min-height: 80svh;
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    padding: 6rem var(--margem);
+    font-size: var(--texto-corpo);
+  }
+
+  .erro h1 {
+    font-size: min(30vw, 6rem);
+  }
+</style>

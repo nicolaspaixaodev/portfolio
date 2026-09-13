@@ -1,0 +1,106 @@
+---
+import "@fontsource-variable/anybody/standard.css";
+import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Cabecalho from "../components/Cabecalho.astro";
+import { textos, type Lang } from "../i18n/ui";
+import { site } from "../data/site";
+
+interface Props {
+  lang: Lang;
+  titulo: string;
+  descricao?: string;
+  pagina: "inicio" | "projeto" | "sobre" | "erro";
+  /** Caminho desta mesma página na outra língua. */
+  alternativo: string;
+}
+
+const { lang, titulo, descricao, pagina, alternativo } = Astro.props;
+const t = textos(lang);
+const outra: Lang = lang === "pt" ? "en" : "pt";
+const canonica = new URL(Astro.url.pathname, Astro.site);
+const alternativa = new URL(alternativo, Astro.site);
+const imagemSocial = new URL(`/og-${lang}.jpg`, Astro.site);
+const pessoa = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: site.nome,
+  jobTitle: "Creative developer",
+  url: new URL("/", Astro.site).href,
+  email: `mailto:${site.email}`,
+  telephone: `+${site.whatsapp}`,
+  address: { "@type": "PostalAddress", addressLocality: "Aracaju", addressRegion: "SE", addressCountry: "BR" },
+};
+---
+
+<!doctype html>
+<html lang={lang === "pt" ? "pt-BR" : "en"} data-depth="superficie" transition:animate="none">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descricao ?? t.descricao} />
+    <meta name="theme-color" content="#F6F8F7" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonica} />
+    <link rel="alternate" hreflang={lang === "pt" ? "pt-BR" : "en"} href={canonica} />
+    <link rel="alternate" hreflang={outra === "pt" ? "pt-BR" : "en"} href={alternativa} />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Nicolas Paixão" />
+    <meta property="og:url" content={canonica} />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao ?? t.descricao} />
+    <meta property="og:locale" content={lang === "pt" ? "pt_BR" : "en_US"} />
+    <meta property="og:image" content={imagemSocial} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t.papel} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={imagemSocial} />
+    <script type="application/ld+json" set:html={JSON.stringify(pessoa)} />
+    <script is:inline>
+      (function () {
+        var niveis = ["superficie", "raso", "fundo", "abismo"];
+        var nivel;
+        try {
+          var pedido = new URLSearchParams(location.search).get("profundidade");
+          if (niveis.indexOf(pedido) > -1) {
+            nivel = pedido;
+            localStorage.setItem("profundidade", pedido);
+          } else {
+            nivel = localStorage.getItem("profundidade");
+          }
+        } catch (e) {}
+        if (niveis.indexOf(nivel) > -1) document.documentElement.dataset.depth = nivel;
+
+        // Esconde o que vai entrar animado. Se o script de movimento não
+        // carregar em 3 segundos, tudo aparece parado e inteiro.
+        var raiz = document.documentElement;
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          raiz.classList.add("movimento");
+          setTimeout(function () {
+            if (!raiz.classList.contains("movimento-ok")) raiz.classList.remove("movimento");
+          }, 3000);
+        }
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body data-pagina={pagina}>
+    <a class="pular" href="#conteudo">{t.pular}</a>
+    <canvas class="agua-canvas" aria-hidden="true" transition:persist="agua"></canvas>
+    <Cabecalho lang={lang} pagina={pagina} alternativo={alternativo} />
+    <svg class="linha-mar" viewBox="0 0 2400 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M0 20 C 100 6, 200 34, 300 20 S 500 6, 600 20 S 800 34, 900 20 S 1100 6, 1200 20 S 1400 34, 1500 20 S 1700 6, 1800 20 S 2000 34, 2100 20 S 2300 6, 2400 20" />
+    </svg>
+    <main id="conteudo">
+      <slot />
+    </main>
+    <script>
+      import "../scripts/movimento";
+    </script>
+  </body>
+</html>

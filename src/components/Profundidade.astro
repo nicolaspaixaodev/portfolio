@@ -1,0 +1,164 @@
+---
+import { niveis, textos, type Lang } from "../i18n/ui";
+import Icone from "./Icone.astro";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = textos(lang);
+---
+
+<div class="profundidade" role="group" aria-label={t.profundidade}>
+  {
+    niveis.map((nivel) => (
+      <button type="button" class="profundidade-nivel" data-nivel={nivel} aria-pressed="false">
+        {t[nivel]}
+      </button>
+    ))
+  }
+  <button type="button" class="profundidade-nivel profundidade-abismo" data-nivel="abismo" aria-pressed="false" aria-label={t.abismo} title={t.abismo}>
+    <Icone nome="lanterna" />
+  </button>
+  <span class="profundidade-linha" aria-hidden="true"></span>
+</div>
+
+<style>
+  /* Sem JavaScript os botões não fariam nada, então nem aparecem. */
+  :global(:root:not(.movimento-ok)) .profundidade {
+    display: none;
+  }
+
+  .profundidade {
+    position: relative;
+    display: inline-flex;
+    gap: 0.9rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .profundidade-nivel {
+    color: var(--fg-2);
+    transition: color 300ms var(--ease-agua);
+  }
+
+  .profundidade-abismo {
+    display: inline-grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    margin-left: 0.2rem;
+  }
+
+  .profundidade-abismo :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .profundidade-nivel[aria-pressed="true"],
+  .profundidade-nivel:hover {
+    color: var(--fg);
+  }
+
+  .profundidade-linha {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 1px;
+    transform-origin: left;
+    transform: translateX(var(--linha-x, 0px)) scaleX(var(--linha-w, 0));
+    background: var(--pino);
+    transition: transform 600ms var(--ease-agua);
+  }
+
+</style>
+
+<script>
+  const ordem = ["superficie", "raso", "fundo", "abismo"];
+  const cores: Record<string, string> = {
+    superficie: "#F6F8F7",
+    raso: "#1FA396",
+    fundo: "#0D5E6B",
+    abismo: "#04151B",
+  };
+  const raiz = document.documentElement;
+  const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function atual() {
+    return raiz.dataset.depth && ordem.includes(raiz.dataset.depth) ? raiz.dataset.depth : "superficie";
+  }
+
+  function marcar() {
+    const nivel = atual();
+    document.querySelectorAll<HTMLElement>(".profundidade").forEach((grupo) => {
+      grupo.querySelectorAll<HTMLButtonElement>(".profundidade-nivel").forEach((botao) => {
+        const ativo = botao.dataset.nivel === nivel;
+        botao.setAttribute("aria-pressed", String(ativo));
+        if (ativo) {
+          grupo.style.setProperty("--linha-x", `${botao.offsetLeft}px`);
+          grupo.style.setProperty("--linha-w", String(botao.offsetWidth));
+        }
+      });
+    });
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", cores[nivel]);
+  }
+
+  function aplicar(nivel: string) {
+    raiz.dataset.depth = nivel;
+    try {
+      localStorage.setItem("profundidade", nivel);
+    } catch {}
+    const url = new URL(location.href);
+    if (url.searchParams.has("profundidade")) {
+      url.searchParams.set("profundidade", nivel);
+      history.replaceState(history.state, "", url);
+    }
+    marcar();
+  }
+
+  function mudar(pedido: string) {
+    // A lanterna funciona como o botão de modo escuro: no abismo, ela volta pra superfície.
+    const nivel = pedido === "abismo" && atual() === "abismo" ? "superficie" : pedido;
+    // Com a água em WebGL, a descida é contínua e quem anima é o módulo de profundidade.
+    if (raiz.classList.contains("agua-ativa")) {
+      document.dispatchEvent(new CustomEvent("profundidade:ir", { detail: ordem.indexOf(nivel) }));
+      return;
+    }
+    const de = atual();
+    if (nivel === de) return;
+
+    if (!document.startViewTransition || semMovimento.matches) {
+      aplicar(nivel);
+      return;
+    }
+
+    const desce = ordem.indexOf(nivel) > ordem.indexOf(de);
+    const linha = document.createElement("div");
+    linha.className = "linha-dagua-mare";
+    linha.style.top = desce ? "calc(100vh - 3px)" : "0px";
+    document.body.append(linha);
+    raiz.dataset.mare = desce ? "desce" : "sobe";
+
+    const transicao = document.startViewTransition(() => {
+      aplicar(nivel);
+      linha.style.top = desce ? "0px" : "calc(100vh - 3px)";
+    });
+
+    transicao.finished.finally(() => {
+      linha.remove();
+      delete raiz.dataset.mare;
+    });
+  }
+
+  document.addEventListener("click", (evento) => {
+    const botao = (evento.target as HTMLElement).closest<HTMLButtonElement>(".profundidade-nivel");
+    if (botao?.dataset.nivel) mudar(botao.dataset.nivel);
+  });
+
+  document.addEventListener("profundidade:tema", marcar);
+  document.addEventListener("astro:page-load", () => {
+    marcar();
+    document.fonts?.ready.then(marcar);
+  });
+  window.addEventListener("resize", marcar);
+</script>

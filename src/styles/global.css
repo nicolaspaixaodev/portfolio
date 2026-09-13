@@ -1,0 +1,405 @@
+/* Mar raso ao meio-dia
+   Superfície: sol e tinta. Raso: a água verde-mar. Fundo: onde a água aprofunda.
+   A cor forte vive só dentro dos prints dos projetos. */
+
+:root {
+  --sol: #f6f8f7;
+  --tinta: #0b1f24;
+  --verde-mar: #1fa396;
+  --fundo: #0d5e6b;
+  --brilho: #effff8;
+  --areia: #c9b48a;
+  --pino: #ffd23f;
+
+  --bg: var(--sol);
+  --fg: var(--tinta);
+  --fg-2: #4a5f64;
+  --fio: rgb(11 31 36 / 0.16);
+
+  --fonte-display: "Anybody Variable", "Anybody", system-ui, sans-serif;
+  --fonte-texto: "Atkinson Hyperlegible Next Variable", "Atkinson Hyperlegible Next", system-ui, sans-serif;
+
+  --margem: clamp(1rem, 1.6vw, 1.5rem);
+  --cab-h: 3.5rem;
+  --t-agua: 1100ms;
+  --ease-agua: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --texto-ui: 0.9375rem;
+  --texto-rotulo: 0.8125rem;
+  --texto-corpo: 1.0625rem;
+
+  color-scheme: light;
+}
+
+:root[data-depth="raso"] .rotulo {
+  font-weight: 600;
+}
+
+:root[data-depth="raso"] {
+  --bg: var(--verde-mar);
+  --fg: var(--tinta);
+  /* Sobre a água com cáusticas, rótulos pequenos precisam da tinta cheia */
+  --fg-2: var(--tinta);
+  --fio: rgb(11 31 36 / 0.24);
+}
+
+:root[data-depth="abismo"] {
+  --bg: #04151b;
+  --fg: var(--brilho);
+  --fg-2: #8fb9b4;
+  --fio: rgb(239 255 248 / 0.16);
+  color-scheme: dark;
+}
+
+:root[data-depth="fundo"] {
+  --bg: var(--fundo);
+  --fg: var(--brilho);
+  --fg-2: #a8dad2;
+  --fio: rgb(239 255 248 / 0.22);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fg) transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--fonte-texto);
+  font-size: var(--texto-ui);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 400ms var(--ease-agua),
+    color 400ms var(--ease-agua);
+}
+
+::selection {
+  background: var(--pino);
+  color: var(--tinta);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+dl,
+dd,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+.display {
+  font-family: var(--fonte-display);
+  font-stretch: 150%;
+  font-weight: 880;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.rotulo {
+  font-size: var(--texto-rotulo);
+  color: var(--fg-2);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pular {
+  position: fixed;
+  left: var(--margem);
+  top: -4rem;
+  z-index: 50;
+  background: var(--pino);
+  color: var(--tinta);
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+}
+
+.pular:focus-visible {
+  top: var(--margem);
+}
+
+/* Link com sublinhado só na hora certa */
+.link {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 350ms var(--ease-agua);
+}
+
+.link:hover,
+.link[aria-current="page"],
+.link:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Ação principal: o amarelo do sol a pino */
+.acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--pino);
+  color: var(--tinta);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.7rem 1rem 0.7rem 1.1rem;
+  border-radius: 999px;
+  transition: background-color 250ms var(--ease-agua);
+}
+
+.acao:hover {
+  background-color: #ffdc66;
+}
+
+.acao svg {
+  width: 0.95em;
+  height: 0.95em;
+}
+
+/* ---------- A camada de baixo ---------- */
+
+.agua-canvas {
+  view-transition-name: none;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+main {
+  position: relative;
+  z-index: 2;
+}
+
+/* Quando o plano em WebGL está pronto, a imagem do DOM só guarda o lugar */
+.gl-pronto,
+.gl-pronto > * {
+  background: transparent !important;
+}
+
+.gl-pronto img,
+.gl-pronto .midia-grao {
+  opacity: 0 !important;
+}
+
+/* No Fundo e no Abismo, os textos são pintados em WebGL pra inverter sob a pincelada */
+:root.gl-textos body > header *,
+:root.gl-textos main * {
+  -webkit-text-fill-color: transparent;
+}
+
+:root.gl-textos main .display[data-split]:not(.gl-titulo) *,
+:root.gl-textos .acao,
+:root.gl-textos .acao * {
+  -webkit-text-fill-color: currentColor;
+}
+
+/* O nome desenhado em WebGL: o DOM continua lá (leitura, seleção), só invisível */
+.gl-titulo,
+.gl-titulo * {
+  color: transparent !important;
+}
+
+/* Linha d'água em repouso: ondula no pé da tela e convida a descer */
+.linha-mar {
+  position: fixed;
+  left: 0;
+  /* Mora abaixo da base dos rodapés, sem cruzar nenhuma letra */
+  bottom: 2px;
+  width: 200vw;
+  height: 16px;
+  /* Atrás do conteúdo (main fica no z-index 2), acima da água em WebGL */
+  z-index: 1;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--pino);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  animation: mare-andando 14s linear infinite;
+  transition: opacity 500ms var(--ease-agua);
+}
+
+:root:not([data-depth="superficie"]) .linha-mar,
+:root.descendo .linha-mar {
+  opacity: 0;
+}
+
+
+
+@keyframes mare-andando {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Entrada: o que vai animar começa escondido ---------- */
+
+:root.movimento [data-split]:not(.split-pronto) {
+  visibility: hidden;
+}
+
+:root.movimento [data-anim]:not(.anim-pronto) {
+  opacity: 0;
+}
+
+:root.movimento [data-anim="agua"]:not(.anim-pronto) {
+  opacity: 1;
+  clip-path: inset(100% 0 0 0);
+}
+
+.letra,
+.linha {
+  will-change: transform;
+}
+
+.palavra {
+  white-space: nowrap;
+}
+
+/* A máscara das letras deixa espaço pros acentos (Ã, É) não serem cortados */
+.letra-mask {
+  padding-top: 0.2em;
+  margin-top: -0.2em;
+}
+
+/* Na troca de profundidade a água cobre tudo, inclusive as imagens com nome */
+:root[data-mare] [style*="view-transition-name"] {
+  view-transition-name: none !important;
+}
+
+/* Elementos com nome atravessam de uma página pra outra */
+::view-transition-group(*) {
+  animation-duration: 1100ms;
+  animation-timing-function: var(--ease-agua);
+}
+
+/* ---------- Mergulho sem WebGL: a água sobe pela página ---------- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+:root[data-mare="desce"]::view-transition-new(root) {
+  animation: agua-sobe var(--t-agua) var(--ease-agua) both;
+}
+
+:root[data-mare="sobe"]::view-transition-old(root) {
+  z-index: 2;
+  animation: agua-baixa var(--t-agua) var(--ease-agua) both;
+}
+
+:root[data-mare="sobe"]::view-transition-new(root) {
+  z-index: 1;
+}
+
+::view-transition-group(linha-dagua) {
+  z-index: 3;
+  animation-duration: var(--t-agua);
+  animation-timing-function: var(--ease-agua);
+}
+
+@keyframes agua-sobe {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes agua-baixa {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(100% 0 0 0);
+  }
+}
+
+.linha-dagua-mare {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--pino);
+  view-transition-name: linha-dagua;
+  pointer-events: none;
+  z-index: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+}

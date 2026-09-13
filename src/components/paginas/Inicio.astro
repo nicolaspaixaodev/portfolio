@@ -1,0 +1,268 @@
+---
+import type { ImageMetadata } from "astro";
+import { getCollection } from "astro:content";
+import Indice from "../Indice.astro";
+import Contato from "../Contato.astro";
+import Midia from "../Midia.astro";
+import { rotas, textos, type Lang } from "../../i18n/ui";
+import { site } from "../../data/site";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = textos(lang);
+
+const projetos = (await getCollection("projetos")).sort((a, b) => a.data.ordem - b.data.ordem);
+
+/*
+ * A coluna rola junto com a página, como na referência, sem repetir nada.
+ * Com 4 projetos ou mais, cada um entra com a capa; com menos, entram os prints
+ * de desktop de cada projeto, pra coluna ter corpo.
+ */
+type Item = { projeto: string; href: string; nome: string; src: ImageMetadata; alt: string; principal: boolean };
+const itens: Item[] = [];
+for (const projeto of projetos) {
+  const href = rotas.projeto(projeto.id)[lang];
+  const nome = projeto.data.nome;
+  if (projetos.length >= 4) {
+    itens.push({ projeto: projeto.id, href, nome, src: projeto.data.capa, alt: projeto.data.capaAlt[lang], principal: true });
+    continue;
+  }
+  projeto.data.galeria
+    .filter((g) => g.formato === "desktop")
+    .forEach((g, i) => itens.push({ projeto: projeto.id, href, nome, src: g.src, alt: g.alt[lang], principal: i === 0 }));
+}
+---
+
+<div class="inicio">
+  <section class="inicio-titulo">
+    <h1 class="display inicio-nome" data-split data-proximidade>
+      <span>Nicolas</span>
+      <span>Paixão</span>
+    </h1>
+    <p class="inicio-linha" data-anim data-atraso="0.25">{t.linha}</p>
+  </section>
+
+  <section class="inicio-coluna" aria-label={t.trabalhos}>
+    {
+      itens.map((item, i) => (
+        <a class="coluna-item" href={item.href} data-projeto={item.projeto} data-anim="agua" data-atraso={String(0.1 + i * 0.1)}>
+          <Midia
+            src={item.src}
+            alt={`${item.nome}: ${item.alt}`}
+            widths={[640, 1024, 1600]}
+            sizes="(min-width: 1024px) 29vw, 100vw"
+            loading={i === 0 ? "eager" : "lazy"}
+            prioridade={i === 0}
+            nome={item.principal ? `midia-${item.projeto}` : undefined}
+          />
+        </a>
+      ))
+    }
+  </section>
+
+  <aside class="inicio-indice" data-anim data-atraso="0.35">
+    <Indice lang={lang} projetos={projetos} />
+  </aside>
+
+  <footer class="inicio-rodape" data-anim data-atraso="0.45">
+    <Contato lang={lang} />
+    <p class="inicio-assinatura rotulo">{t.base} · © {site.ano}</p>
+  </footer>
+</div>
+
+<style>
+  .inicio-titulo {
+    padding: 3.5rem var(--margem) 0;
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .inicio-nome {
+    display: grid;
+    font-size: calc((100vw - 2 * var(--margem)) / 7.5);
+  }
+
+  .inicio-linha {
+    max-width: 30ch;
+    font-size: var(--texto-corpo);
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  .inicio-coluna {
+    padding: 2.5rem var(--margem) 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .coluna-item {
+    display: block;
+    outline-offset: 4px;
+  }
+
+  .coluna-item :global(.midia) {
+    aspect-ratio: 16 / 10;
+  }
+
+  .inicio-indice {
+    padding: 3rem var(--margem) 0;
+  }
+
+  .inicio-rodape {
+    padding: 3rem var(--margem) 5.5rem;
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (max-width: 1023px) {
+    .inicio-rodape :global(.contato-whatsapp) {
+      position: fixed;
+      right: var(--margem);
+      bottom: var(--margem);
+      z-index: 20;
+      border: 1.5px solid var(--tinta);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .inicio-titulo {
+      position: fixed;
+      left: var(--margem);
+      top: calc(var(--cab-h) + 1.25rem);
+      width: 42vw;
+      padding: 0;
+      z-index: 2;
+    }
+
+    .inicio-nome {
+      font-size: min(6.1vw, 6rem);
+    }
+
+    .inicio-linha {
+      max-width: 26rem;
+    }
+
+    /* A coluna é o conteúdo que rola; o resto fica parado em volta dela */
+    .inicio-coluna {
+      width: 28.5vw;
+      margin-left: 46.5vw;
+      padding: calc(var(--cab-h) + 1.25rem) 0 42vh;
+      gap: 1rem;
+    }
+
+    .inicio-indice {
+      position: fixed;
+      right: var(--margem);
+      top: 38vh;
+      width: 15vw;
+      padding: 0;
+      z-index: 2;
+    }
+
+    .inicio-rodape {
+      position: fixed;
+      left: var(--margem);
+      right: var(--margem);
+      bottom: 2rem;
+      padding: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .inicio-rodape > :global(*) {
+      pointer-events: auto;
+    }
+
+    .inicio-rodape :global(.contato) {
+      max-width: 42vw;
+    }
+  }
+</style>
+
+<script>
+  import { encher } from "../../scripts/movimento";
+
+  let limpar: (() => void) | undefined;
+
+  document.addEventListener("astro:page-load", () => {
+    limpar?.();
+    const itens = [...document.querySelectorAll<HTMLElement>(".coluna-item[data-projeto]")];
+    if (!itens.length) return;
+    const limpezas: (() => void)[] = [];
+
+    const indice = document.querySelector<HTMLElement>(".indice-lista");
+    const ativar = (id?: string) =>
+      indice?.querySelectorAll<HTMLElement>(".indice-item").forEach((item) => (item.dataset.ativo = String(item.dataset.projeto === id)));
+
+    // A linha d'água do índice acompanha o projeto que está no meio da tela.
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) if (entrada.isIntersecting) ativar((entrada.target as HTMLElement).dataset.projeto);
+      },
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+    itens.forEach((item) => observador.observe(item));
+    limpezas.push(() => observador.disconnect());
+
+    // Mouse na foto acende o nome no índice.
+    itens.forEach((item) => {
+      const id = item.dataset.projeto;
+      const nomeNoIndice = indice?.querySelector<HTMLElement>(`.indice-item[data-projeto="${id}"]`);
+      const entra = () => {
+        ativar(id);
+        indice?.classList.add("com-foco");
+        nomeNoIndice?.classList.add("em-foco");
+      };
+      const sai = () => {
+        indice?.classList.remove("com-foco");
+        nomeNoIndice?.classList.remove("em-foco");
+      };
+      item.addEventListener("pointerenter", entra);
+      item.addEventListener("pointerleave", sai);
+      limpezas.push(() => {
+        item.removeEventListener("pointerenter", entra);
+        item.removeEventListener("pointerleave", sai);
+      });
+    });
+
+    // Mouse no nome do índice enche de cor a foto daquele projeto mais perto do centro da tela.
+    const midiaMaisPerto = (id?: string) => {
+      const centro = window.innerHeight / 2;
+      return (
+        itens
+          .filter((i) => i.dataset.projeto === id)
+          .map((i) => i.querySelector<HTMLElement>("[data-midia]"))
+          .filter((m): m is HTMLElement => Boolean(m))
+          .sort((a, b) => {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            return Math.abs(ra.top + ra.height / 2 - centro) - Math.abs(rb.top + rb.height / 2 - centro);
+          })[0] ?? null
+      );
+    };
+    indice?.querySelectorAll<HTMLElement>(".indice-link").forEach((link) => {
+      const id = link.closest<HTMLElement>(".indice-item")?.dataset.projeto;
+      const entra = () => encher(midiaMaisPerto(id), true);
+      const sai = () => encher(midiaMaisPerto(id), false);
+      link.addEventListener("pointerenter", entra);
+      link.addEventListener("pointerleave", sai);
+      link.addEventListener("focus", entra);
+      link.addEventListener("blur", sai);
+      limpezas.push(() => {
+        link.removeEventListener("pointerenter", entra);
+        link.removeEventListener("pointerleave", sai);
+        link.removeEventListener("focus", entra);
+        link.removeEventListener("blur", sai);
+      });
+    });
+
+    limpar = () => limpezas.forEach((f) => f());
+  });
+
+  document.addEventListener("astro:before-swap", () => limpar?.());
+</script>

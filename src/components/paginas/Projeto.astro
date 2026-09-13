@@ -1,0 +1,453 @@
+---
+import { Image } from "astro:assets";
+import { getCollection, type CollectionEntry } from "astro:content";
+import Icone from "../Icone.astro";
+import Contato from "../Contato.astro";
+import Midia from "../Midia.astro";
+import { rotas, textos, type Lang } from "../../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  projeto: CollectionEntry<"projetos">;
+}
+const { lang, projeto } = Astro.props;
+const t = textos(lang);
+const d = projeto.data;
+
+const todos = (await getCollection("projetos")).sort((a, b) => a.data.ordem - b.data.ordem);
+const posicao = todos.findIndex((p) => p.id === projeto.id);
+const proximo = todos.length > 1 ? todos[(posicao + 1) % todos.length] : undefined;
+---
+
+<article class="projeto">
+  <h1 class="display projeto-titulo" data-split>{d.nome}</h1>
+
+  <div class="galeria">
+    <div
+      class="galeria-trilho"
+      tabindex="0"
+      role="region"
+      aria-roledescription={lang === "pt" ? "carrossel" : "carousel"}
+      aria-label={`${t.galeria}: ${d.nome}`}
+    >
+      <ol class="galeria-lista">
+        {
+          d.galeria.map((g, i) => (
+            <li
+              class:list={["galeria-item", `galeria-${g.formato}`]}
+              data-legenda={g.legenda?.[lang] ?? ""}
+              data-anim={i === 0 ? undefined : "deslizar"}
+              data-atraso={i === 0 ? undefined : String(0.05 + i * 0.07)}
+            >
+              <figure class="galeria-quadro" style={i === 0 ? `view-transition-name: midia-${projeto.id}` : undefined}>
+                <Image
+                  src={g.src}
+                  alt={g.alt[lang]}
+                  widths={g.formato === "celular" ? [360, 720, 1080] : [800, 1280, 1920]}
+                  sizes={g.formato === "celular" ? "(min-width: 1024px) 14vw, 30vw" : "(min-width: 1024px) 56vw, 84vw"}
+                  loading={i < 3 ? "eager" : "lazy"}
+                  draggable="false"
+                />
+              </figure>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+    <p class="galeria-legenda rotulo" aria-hidden="true" data-anim data-atraso="0.5">{d.galeria[0]?.legenda?.[lang]}</p>
+  </div>
+
+  <footer class="projeto-rodape" data-anim data-atraso="0.35">
+    <p class="projeto-resumo">{d.resumo[lang]}</p>
+
+    <dl class="projeto-ficha">
+      <div>
+        <dt class="rotulo">{t.ano}</dt>
+        <dd>{d.ano}</dd>
+      </div>
+      <div>
+        <dt class="rotulo">{t.tipo}</dt>
+        <dd>{d.tipo[lang]}</dd>
+      </div>
+      <div>
+        <dt class="rotulo">{t.funcao}</dt>
+        <dd>{d.funcao[lang]}</dd>
+      </div>
+      <div>
+        <dt class="rotulo">{t.visitar}</dt>
+        <dd>
+          <a class="link projeto-visitar" href={d.link} target="_blank" rel="noopener">
+            {t.siteNoAr}
+            <Icone nome="seta-diagonal" />
+          </a>
+        </dd>
+      </div>
+    </dl>
+
+    {
+      proximo ? (
+        <a class="projeto-proximo" href={rotas.projeto(proximo.id)[lang]}>
+          <span class="projeto-proximo-texto">
+            <span class="rotulo">{t.proximo}</span>
+            <span>{proximo.data.nome}</span>
+          </span>
+          <Midia
+            src={proximo.data.capa}
+            alt=""
+            widths={[240, 480]}
+            sizes="9rem"
+            nome={`midia-${proximo.id}`}
+            class="projeto-proximo-midia"
+          />
+        </a>
+      ) : (
+        <Contato lang={lang} class="projeto-contato" />
+      )
+    }
+  </footer>
+</article>
+
+<style>
+  .projeto {
+    --item-h: 52vw;
+    display: grid;
+    gap: 1.75rem;
+    padding: 2.5rem 0 6rem;
+  }
+
+  .projeto-titulo {
+    padding: 0 var(--margem);
+    text-align: center;
+    font-size: clamp(2.4rem, 10vw, 6rem);
+  }
+
+  .galeria {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .galeria-trilho {
+    position: relative;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    outline-offset: -3px;
+  }
+
+  .galeria-trilho::-webkit-scrollbar {
+    display: none;
+  }
+
+  .galeria-lista {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 1.4vw, 1.6rem);
+    width: max-content;
+    padding-inline: calc(50vw - var(--item-h) * 0.8);
+    will-change: transform;
+  }
+
+  .galeria-item {
+    scroll-snap-align: center;
+    flex: none;
+  }
+
+  .galeria-desktop {
+    width: calc(var(--item-h) * 1.6);
+  }
+
+  .galeria-celular {
+    width: calc(var(--item-h) * 0.462);
+  }
+
+  .galeria-quadro {
+    height: var(--item-h);
+    background: var(--fio);
+    overflow: hidden;
+  }
+
+  .galeria-quadro :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .galeria-legenda {
+    min-height: 2.6em;
+    max-width: 52ch;
+    margin: 0 auto;
+    padding: 0 var(--margem);
+    text-align: center;
+    text-wrap: balance;
+    transition: opacity 300ms var(--ease-agua);
+  }
+
+  .galeria-legenda.trocando {
+    opacity: 0;
+  }
+
+  .projeto-rodape {
+    display: grid;
+    gap: 2rem;
+    padding: 0 var(--margem);
+  }
+
+  .projeto-resumo {
+    max-width: 34rem;
+    font-size: var(--texto-corpo);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  .projeto-ficha {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .projeto-ficha > div {
+    display: grid;
+    gap: 0.15rem;
+    align-content: start;
+  }
+
+  .projeto-ficha dd {
+    overflow-wrap: anywhere;
+  }
+
+  .projeto-visitar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .projeto-visitar :global(svg) {
+    width: 0.8em;
+    height: 0.8em;
+  }
+
+  .projeto-proximo {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    text-decoration: none;
+  }
+
+  .projeto-proximo-texto {
+    display: grid;
+    text-align: right;
+  }
+
+  .projeto-proximo :global(.projeto-proximo-midia) {
+    width: 9rem;
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (min-width: 1024px) {
+    .projeto {
+      --item-h: min(46svh, 32vw);
+      min-height: 100svh;
+      grid-template-rows: auto 1fr auto;
+      gap: 1.25rem;
+      padding: calc(var(--cab-h) + 1.5rem) 0 2rem;
+    }
+
+    .projeto-titulo {
+      font-size: min(4.9vw, 6rem);
+    }
+
+    .galeria {
+      align-self: center;
+    }
+
+    .galeria-trilho {
+      scroll-snap-type: none;
+      cursor: grab;
+    }
+
+    .galeria-trilho.arrastando {
+      cursor: grabbing;
+    }
+
+    .projeto-rodape {
+      grid-template-columns: minmax(18rem, 30rem) minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 3rem;
+    }
+
+    .projeto-resumo {
+      font-size: 1.125rem;
+    }
+
+    .projeto-ficha {
+      grid-template-columns: repeat(4, minmax(0, max-content));
+      justify-content: center;
+      gap: 1rem 3rem;
+    }
+
+    .projeto-rodape :global(.projeto-contato) {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.9rem;
+    }
+
+    .projeto-rodape :global(.projeto-contato .contato-email) {
+      justify-items: end;
+      text-align: right;
+    }
+  }
+</style>
+
+<script>
+  import gsap from "gsap";
+  import Lenis from "lenis";
+  import { estado } from "../../scripts/estado";
+
+  let limpar: (() => void) | undefined;
+
+  document.addEventListener("astro:page-load", () => {
+    limpar?.();
+    const trilho = document.querySelector<HTMLElement>(".galeria-trilho");
+    const lista = trilho?.querySelector<HTMLElement>(".galeria-lista");
+    const legenda = document.querySelector<HTMLElement>(".galeria-legenda");
+    if (!trilho || !lista) return;
+
+    const itens = [...lista.querySelectorAll<HTMLElement>(".galeria-item")];
+    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const comMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const limpezas: (() => void)[] = [];
+
+    const centroDe = (item: HTMLElement) => item.offsetLeft + item.offsetWidth / 2 - trilho.clientWidth / 2;
+
+    function maisPerto(posicao: number) {
+      let melhor = 0;
+      let distancia = Infinity;
+      itens.forEach((item, i) => {
+        const d = Math.abs(centroDe(item) - posicao);
+        if (d < distancia) {
+          distancia = d;
+          melhor = i;
+        }
+      });
+      return melhor;
+    }
+
+    let atual = -1;
+    function atualizarLegenda(posicao: number) {
+      const i = maisPerto(posicao);
+      if (i === atual || !legenda) return;
+      atual = i;
+      const texto = itens[i].dataset.legenda ?? "";
+      legenda.classList.add("trocando");
+      window.setTimeout(() => {
+        legenda.textContent = texto;
+        legenda.classList.remove("trocando");
+      }, 220);
+    }
+
+    if (comMouse && !semMovimento) {
+      const lenis = new Lenis({
+        wrapper: trilho,
+        content: lista,
+        orientation: "horizontal",
+        // A roda vertical chega pelo estado.consumirRolagem; aqui só o arraste horizontal do trackpad.
+        gestureOrientation: "horizontal",
+        autoRaf: false,
+        lerp: 0.075,
+      });
+      const tique = (tempo: number) => lenis.raf(tempo * 1000);
+      gsap.ticker.add(tique);
+
+      const inclinar = gsap.quickTo(lista, "skewX", { duration: 0.7, ease: "power3.out" });
+      let esperaEncaixe = 0;
+      let arrastando = false;
+
+      const irPara = (i: number) => {
+        const alvo = itens[Math.max(0, Math.min(itens.length - 1, i))];
+        lenis.scrollTo(centroDe(alvo), { duration: 1.3, easing: (x) => 1 - Math.pow(1 - x, 4) });
+      };
+
+      lenis.on("scroll", ({ scroll, velocity }) => {
+        estado.carrossel = velocity;
+        // Com a água ligada, quem entorta os prints é o shader.
+        const comAgua = document.documentElement.classList.contains("agua-ativa");
+        inclinar(comAgua ? 0 : gsap.utils.clamp(-4, 4, velocity * -0.14));
+        atualizarLegenda(scroll);
+        window.clearTimeout(esperaEncaixe);
+        esperaEncaixe = window.setTimeout(() => {
+          inclinar(0);
+          estado.carrossel = 0;
+          if (!arrastando) irPara(maisPerto(lenis.scroll));
+        }, 180);
+      });
+
+      // Arrastar com o mouse
+      let inicioX = 0;
+      let inicioScroll = 0;
+      const apertar = (e: PointerEvent) => {
+        if (e.button !== 0) return;
+        arrastando = true;
+        inicioX = e.clientX;
+        inicioScroll = lenis.scroll;
+        trilho.setPointerCapture(e.pointerId);
+        trilho.classList.add("arrastando");
+      };
+      const mover = (e: PointerEvent) => {
+        if (!arrastando) return;
+        lenis.scrollTo(inicioScroll - (e.clientX - inicioX) * 1.3, { immediate: true });
+      };
+      const soltar = () => {
+        if (!arrastando) return;
+        arrastando = false;
+        trilho.classList.remove("arrastando");
+        irPara(maisPerto(lenis.scroll));
+      };
+      const teclar = (e: KeyboardEvent) => {
+        const i = maisPerto(lenis.scroll);
+        if (e.key === "ArrowRight") irPara(i + 1);
+        else if (e.key === "ArrowLeft") irPara(i - 1);
+        else if (e.key === "Home") irPara(0);
+        else if (e.key === "End") irPara(itens.length - 1);
+        else return;
+        e.preventDefault();
+      };
+
+      estado.consumirRolagem = (dy) => {
+        const limite = lenis.limit;
+        const destino = lenis.targetScroll;
+        if ((dy > 0 && destino >= limite - 1) || (dy < 0 && destino <= 1)) return false;
+        lenis.scrollTo(Math.min(limite, Math.max(0, destino + dy * 1.2)));
+        return true;
+      };
+
+      trilho.addEventListener("pointerdown", apertar);
+      trilho.addEventListener("pointermove", mover);
+      trilho.addEventListener("pointerup", soltar);
+      trilho.addEventListener("pointercancel", soltar);
+      trilho.addEventListener("keydown", teclar);
+
+      limpezas.push(() => {
+        estado.consumirRolagem = null;
+        gsap.ticker.remove(tique);
+        lenis.destroy();
+        trilho.removeEventListener("pointerdown", apertar);
+        trilho.removeEventListener("pointermove", mover);
+        trilho.removeEventListener("pointerup", soltar);
+        trilho.removeEventListener("pointercancel", soltar);
+        trilho.removeEventListener("keydown", teclar);
+      });
+    } else {
+      const rolar = () => atualizarLegenda(trilho.scrollLeft);
+      trilho.addEventListener("scroll", rolar, { passive: true });
+      limpezas.push(() => trilho.removeEventListener("scroll", rolar));
+    }
+
+    limpar = () => limpezas.forEach((f) => f());
+  });
+
+  document.addEventListener("astro:before-swap", () => limpar?.());
+</script>

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.env*
+
+# Capturas de revisão e estado das decisões da Impeccable (pesados, de trabalho)
+.impeccable/review/
+.impeccable/questions/
+
+# Modelos 3D do Fab: ficam fora do repositório público até a licença ser confirmada
+public/modelos/*.glb

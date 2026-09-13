@@ -1,0 +1,88 @@
+---
+import Icone from "./Icone.astro";
+import { textos, type Lang } from "../i18n/ui";
+import { linkWhatsApp, site } from "../data/site";
+
+interface Props {
+  lang: Lang;
+  class?: string;
+}
+const { lang, class: classe } = Astro.props;
+const t = textos(lang);
+---
+
+<div class:list={["contato", classe]}>
+  <div class="contato-email">
+    <span class="rotulo">{t.contato}</span>
+    <span class="contato-aviso rotulo" role="status" aria-live="polite"></span>
+    <button
+      type="button"
+      class="contato-copiar link"
+      data-copiar={site.email}
+      data-ok={t.emailCopiado}
+      data-falhou={t.emailFalhou}
+      title={t.copiarEmail}
+    >
+      {site.email}
+    </button>
+  </div>
+  <a class="acao contato-whatsapp" href={linkWhatsApp(t.whatsappMensagem)} target="_blank" rel="noopener">
+    {t.whatsapp}
+    <Icone nome="seta-diagonal" />
+  </a>
+</div>
+
+<style>
+  .contato {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .contato-email {
+    display: grid;
+    grid-template-columns: auto;
+    gap: 0.15rem;
+    justify-items: start;
+  }
+
+  .contato-email > .rotulo {
+    grid-area: 1 / 1;
+  }
+
+  .contato-copiar {
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .contato-aviso {
+    color: var(--fg);
+  }
+
+  .contato-email:has(.contato-aviso:not(:empty)) > .rotulo:first-child {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  document.addEventListener("click", async (evento) => {
+    const botao = (evento.target as HTMLElement).closest<HTMLButtonElement>("[data-copiar]");
+    if (!botao) return;
+    const aviso = botao.parentElement?.querySelector<HTMLElement>(".contato-aviso");
+    try {
+      await navigator.clipboard.writeText(botao.dataset.copiar ?? "");
+      if (aviso) aviso.textContent = botao.dataset.ok ?? "";
+    } catch {
+      if (aviso) aviso.textContent = botao.dataset.falhou ?? "";
+      const selecao = window.getSelection();
+      const faixa = document.createRange();
+      faixa.selectNodeContents(botao);
+      selecao?.removeAllRanges();
+      selecao?.addRange(faixa);
+    }
+    window.setTimeout(() => {
+      if (aviso) aviso.textContent = "";
+    }, 2400);
+  });
+</script>

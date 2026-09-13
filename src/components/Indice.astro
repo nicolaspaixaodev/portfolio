@@ -1,0 +1,132 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import { rotas, textos, type Lang } from "../i18n/ui";
+
+interface Props {
+  lang: Lang;
+  projetos: CollectionEntry<"projetos">[];
+}
+const { lang, projetos } = Astro.props;
+const t = textos(lang);
+---
+
+<nav class="indice" aria-labelledby="indice-titulo">
+  <h2 id="indice-titulo" class="rotulo indice-titulo">{t.indice}</h2>
+  <ol class="indice-lista">
+    {
+      projetos.map((projeto, i) => (
+        <li class="indice-item" data-projeto={projeto.id} data-ativo={i === 0 ? "true" : "false"}>
+          <a class="indice-link" href={rotas.projeto(projeto.id)[lang]}>
+            <span class="indice-nome">{projeto.data.nome}</span>
+            <span class="indice-previa" aria-hidden="true">
+              <Image src={projeto.data.capa} alt="" widths={[320, 640]} sizes="16rem" />
+              <span class="indice-linha">{projeto.data.linha[lang]}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .indice {
+    display: grid;
+    gap: 0.6rem;
+    justify-items: end;
+    text-align: right;
+  }
+
+  .indice-titulo {
+    font-weight: 400;
+    font-size: var(--texto-rotulo);
+  }
+
+  .indice-lista {
+    display: grid;
+    gap: 0.3rem;
+    justify-items: end;
+  }
+
+  .indice-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    transition: opacity 300ms var(--ease-agua);
+  }
+
+  /* A linha d'água marca o projeto em que você está */
+  .indice-nome::before {
+    content: "";
+    display: inline-block;
+    vertical-align: middle;
+    width: 1rem;
+    height: 3px;
+    margin-right: 0.5rem;
+    background: var(--pino);
+    transform-origin: right;
+    transform: scaleX(0);
+    transition: transform 500ms var(--ease-agua);
+  }
+
+  .indice-item[data-ativo="true"] .indice-nome::before {
+    transform: scaleX(1);
+  }
+
+  .indice-lista:has(.indice-link:hover, .indice-link:focus-visible) .indice-link:not(:hover, :focus-visible),
+  .indice-lista.com-foco .indice-item:not(.em-foco) .indice-link {
+    opacity: 0.45;
+  }
+
+  .indice-previa {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    width: min(16rem, 22vw);
+    display: grid;
+    gap: 0.5rem;
+    text-align: right;
+    opacity: 0;
+    transform: translateY(-0.5rem);
+    clip-path: inset(0 0 100% 0);
+    pointer-events: none;
+    transition:
+      opacity 350ms var(--ease-agua),
+      transform 500ms var(--ease-agua),
+      clip-path 600ms var(--ease-agua);
+  }
+
+  .indice-previa :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .indice-linha {
+    font-size: var(--texto-rotulo);
+    color: var(--fg-2);
+    text-wrap: pretty;
+  }
+
+  .indice-link:hover .indice-previa,
+  .indice-link:focus-visible .indice-previa {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0 0);
+  }
+
+  @media (max-width: 1023px) {
+    .indice,
+    .indice-lista {
+      justify-items: start;
+      text-align: left;
+    }
+
+    .indice-previa {
+      display: none;
+    }
+  }
+</style>

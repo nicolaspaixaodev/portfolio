@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../../../layouts/Base.astro";
+import Projeto from "../../../components/paginas/Projeto.astro";
+import { rotas } from "../../../i18n/ui";
+
+export async function getStaticPaths() {
+  const projetos = await getCollection("projetos");
+  return projetos.map((projeto) => ({ params: { slug: projeto.id }, props: { projeto } }));
+}
+
+const { projeto } = Astro.props;
+---
+
+<Base
+  lang="en"
+  pagina="projeto"
+  titulo={`${projeto.data.nome} · Nicolas Paixão`}
+  descricao={projeto.data.linha.en}
+  alternativo={rotas.projeto(projeto.id).pt}
+>
+  <Projeto lang="en" projeto={projeto} />
+</Base>

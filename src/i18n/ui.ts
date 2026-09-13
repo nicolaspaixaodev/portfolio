@@ -1,0 +1,98 @@
+export type Lang = "pt" | "en";
+export type Nivel = "superficie" | "raso" | "fundo" | "abismo";
+
+export const niveis: Nivel[] = ["superficie", "raso", "fundo"];
+export const todosNiveis: Nivel[] = ["superficie", "raso", "fundo", "abismo"];
+
+export const rotas = {
+  inicio: { pt: "/", en: "/en/" },
+  sobre: { pt: "/sobre/", en: "/en/about/" },
+  projeto: (id: string) => ({ pt: `/projetos/${id}/`, en: `/en/projects/${id}/` }),
+};
+
+export const ui = {
+  pt: {
+    pular: "Pular para o conteúdo",
+    papel: "Creative developer em Aracaju",
+    linha:
+      "Faço sites vivos, rápidos e bem construídos, que o seu cliente usa, e não só olha.",
+    descricao:
+      "Portfólio de Nicolas Paixão, creative developer em Aracaju. Sites com movimento e cuidado, feitos pra negócio de verdade.",
+    sobre: "Sobre",
+    indice: "Índice",
+    trabalhos: "Trabalhos",
+    idioma: "Idioma",
+    profundidade: "Profundidade",
+    superficie: "Superfície",
+    raso: "Raso",
+    fundo: "Fundo",
+    abismo: "Abismo (modo escuro)",
+    contato: "Contato",
+    copiarEmail: "Clique para copiar o e-mail",
+    emailCopiado: "E-mail copiado",
+    emailFalhou: "Não deu pra copiar. Selecione o endereço.",
+    whatsapp: "Chamar no WhatsApp",
+    whatsappMensagem: "Oi, Nicolas! Vi seu portfólio e quero conversar sobre um site.",
+    base: "Aracaju, SE",
+    ano: "Ano",
+    tipo: "Tipo",
+    funcao: "Função",
+    stack: "Stack",
+    visitar: "Visitar",
+    siteNoAr: "Site no ar",
+    proximo: "Próximo projeto",
+    galeria: "Imagens do projeto",
+    anterior: "Imagem anterior",
+    seguinte: "Próxima imagem",
+    abrirProjeto: "Abrir projeto",
+    ferramentas: "Ferramentas",
+    formacao: "Formação",
+    creditos: "Modelos 3D do abismo: Tuna Fish, de GoldenZtuff, e Shark, de Optic Idealist, via Fab.",
+    naoEncontrada: "Essa página afundou.",
+    voltarInicio: "Voltar pro início",
+  },
+  en: {
+    pular: "Skip to content",
+    papel: "Creative developer in Aracaju, Brazil",
+    linha:
+      "I build lively, fast, well-made websites your customers actually use, not just look at.",
+    descricao:
+      "Portfolio of Nicolas Paixão, a creative developer in Aracaju, Brazil. Websites with motion and care, made for real businesses.",
+    sobre: "About",
+    indice: "Index",
+    trabalhos: "Work",
+    idioma: "Language",
+    profundidade: "Depth",
+    superficie: "Surface",
+    raso: "Shallow",
+    fundo: "Deep",
+    abismo: "Abyss (dark mode)",
+    contato: "Contact",
+    copiarEmail: "Click to copy the email address",
+    emailCopiado: "Email copied",
+    emailFalhou: "Couldn't copy. Select the address instead.",
+    whatsapp: "Message on WhatsApp",
+    whatsappMensagem: "Hi Nicolas! I saw your portfolio and I'd like to talk about a website.",
+    base: "Aracaju, Brazil",
+    ano: "Year",
+    tipo: "Type",
+    funcao: "Role",
+    stack: "Stack",
+    visitar: "Visit",
+    siteNoAr: "Live site",
+    proximo: "Next project",
+    galeria: "Project images",
+    anterior: "Previous image",
+    seguinte: "Next image",
+    abrirProjeto: "Open project",
+    ferramentas: "Tools",
+    formacao: "Education",
+    creditos: "Abyss 3D models: Tuna Fish by GoldenZtuff and Shark by Optic Idealist, via Fab.",
+    naoEncontrada: "This page sank.",
+    voltarInicio: "Back to home",
+  },
+} as const;
+
+export function textos(lang: Lang) {
+  return ui[lang];
+}

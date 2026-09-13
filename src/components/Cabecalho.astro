@@ -1,0 +1,112 @@
+---
+import Profundidade from "./Profundidade.astro";
+import Icone from "./Icone.astro";
+import { rotas, textos, type Lang } from "../i18n/ui";
+import { site } from "../data/site";
+
+interface Props {
+  lang: Lang;
+  pagina: "inicio" | "projeto" | "sobre" | "erro";
+  alternativo: string;
+}
+const { lang, pagina, alternativo } = Astro.props;
+const t = textos(lang);
+const outra: Lang = lang === "pt" ? "en" : "pt";
+---
+
+<header class="cabecalho">
+  <div class="cabecalho-esquerda" data-anim>
+    {
+      pagina === "inicio" ? (
+        <span>{t.papel}</span>
+      ) : (
+        <a class="link" href={rotas.inicio[lang]}>
+          {site.nome}
+        </a>
+      )
+    }
+    {
+      pagina === "projeto" && (
+        <a class="cabecalho-voltar link" href={rotas.inicio[lang]}>
+          <Icone nome="seta-esquerda" />
+          {t.indice}
+        </a>
+      )
+    }
+  </div>
+
+  <nav class="cabecalho-direita" aria-label={lang === "pt" ? "Principal" : "Main"} data-anim data-atraso="0.08">
+    <a class="link" href={rotas.sobre[lang]} aria-current={pagina === "sobre" ? "page" : undefined}>{t.sobre}</a>
+    <span class="idioma" role="group" aria-label={t.idioma}>
+      <span class="idioma-atual" aria-current="true">{lang.toUpperCase()}</span>
+      <span class="idioma-barra" aria-hidden="true">/</span>
+      <a class="link" href={alternativo} hreflang={outra} lang={outra}>{outra.toUpperCase()}</a>
+    </span>
+    <Profundidade lang={lang} />
+  </nav>
+</header>
+
+<style>
+  .cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem 2rem;
+    padding: 1.1rem var(--margem) 0;
+    font-size: var(--texto-ui);
+    position: relative;
+    z-index: 10;
+  }
+
+  .cabecalho-esquerda {
+    display: flex;
+    gap: 1rem 4rem;
+    flex-wrap: wrap;
+  }
+
+  .cabecalho-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .cabecalho-voltar :global(svg) {
+    width: 0.9em;
+    height: 0.9em;
+  }
+
+  .cabecalho-direita {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem 1.75rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .idioma {
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+
+  .idioma-barra {
+    color: var(--fg-2);
+  }
+
+  @media (min-width: 1024px) {
+    .cabecalho {
+      position: fixed;
+      inset: 0 0 auto 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .cabecalho {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .cabecalho-direita {
+      justify-content: flex-start;
+    }
+  }
+</style>

@@ -1,0 +1,125 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
+/**
+ * Imagem da superfície: desbotada pelo sol, com granulado.
+ * A cor mora numa segunda camada que o mouse (ou a água) revela.
+ */
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  widths: number[];
+  sizes: string;
+  loading?: "eager" | "lazy";
+  prioridade?: boolean;
+  /** Nome da transição entre páginas (view-transition-name). */
+  nome?: string;
+  class?: string;
+}
+
+const { src, alt, widths, sizes, loading = "lazy", prioridade = false, nome, class: classe } = Astro.props;
+---
+
+<span class:list={["midia", classe]} data-midia style={nome ? `view-transition-name: ${nome}` : undefined}>
+  <Image
+    class="midia-base"
+    src={src}
+    alt={alt}
+    widths={widths}
+    sizes={sizes}
+    loading={loading}
+    fetchpriority={prioridade ? "high" : "auto"}
+    draggable="false"
+  />
+  <span class="midia-grao" aria-hidden="true"></span>
+  <Image class="midia-cor" src={src} alt="" aria-hidden="true" widths={widths} sizes={sizes} loading={loading} draggable="false" />
+</span>
+
+<style>
+  .midia {
+    --mx: 50%;
+    --my: 50%;
+    --r: 0px;
+    position: relative;
+    display: block;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--fio);
+  }
+
+  .midia :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .midia :global(.midia-base) {
+    filter: grayscale(1) contrast(1.08) brightness(1.03);
+  }
+
+  .midia-grao {
+    position: absolute;
+    inset: -50%;
+    z-index: 1;
+    background: url("/textura/granulado.png") repeat;
+    background-size: 128px 128px;
+    opacity: 0.3;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    animation: grao 0.5s steps(5) infinite;
+  }
+
+  .midia :global(.midia-cor) {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    -webkit-mask-image: radial-gradient(circle var(--r) at var(--mx) var(--my), #000 45%, transparent 100%);
+    mask-image: radial-gradient(circle var(--r) at var(--mx) var(--my), #000 45%, transparent 100%);
+  }
+
+  /* Embaixo d'água, a cor aparece inteira */
+  :global(:root[data-depth="raso"]) .midia :global(.midia-cor),
+  :global(:root[data-depth="fundo"]) .midia :global(.midia-cor) {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  :global(:root[data-depth="raso"]) .midia-grao,
+  :global(:root[data-depth="fundo"]) .midia-grao {
+    opacity: 0;
+  }
+
+  /* Sem água (sem WebGL ou com movimento reduzido), no toque a cor chega quando a imagem
+     entra na tela. Com água, a capa espera o dedo mexer. */
+  @media (hover: none) {
+    :global(:root.sem-agua) .midia :global(.midia-cor) {
+      -webkit-mask-image: none;
+      mask-image: none;
+      opacity: 0;
+      transition: opacity 1200ms var(--ease-agua);
+    }
+
+    :global(:root.sem-agua) .midia.na-agua :global(.midia-cor) {
+      opacity: 1;
+    }
+  }
+
+  @keyframes grao {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-7%, 4%); }
+    40% { transform: translate(5%, -6%); }
+    60% { transform: translate(-3%, 8%); }
+    80% { transform: translate(8%, 2%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .midia-grao {
+      animation: none;
+    }
+  }
+</style>

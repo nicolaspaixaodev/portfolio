@@ -1,0 +1,9 @@
+---
+import Base from "../layouts/Base.astro";
+import Sobre from "../components/paginas/Sobre.astro";
+import { rotas } from "../i18n/ui";
+---
+
+<Base lang="pt" pagina="sobre" titulo="Sobre · Nicolas Paixão" alternativo={rotas.sobre.en}>
+  <Sobre lang="pt" />
+</Base>
