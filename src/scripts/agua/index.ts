@@ -5,6 +5,7 @@
 import {
   CanvasTexture,
   LinearFilter,
+  LinearMipmapLinearFilter,
   SRGBColorSpace,
   Mesh,
   NoColorSpace,
@@ -164,6 +165,7 @@ export function iniciar() {
         uPose: { value: new Vector3() },
         uFoco: { value: 1 },
         uRaio: { value: RAIO },
+        uOpacidade: { value: 1 },
       },
     });
     const mesh = new Mesh(geometria, material);
@@ -222,9 +224,11 @@ export function iniciar() {
         const textura = new Texture(bitmap);
         textura.flipY = false;
         textura.colorSpace = NoColorSpace;
-        textura.minFilter = LinearFilter;
+        // Com mipmaps, a fresta do tambor lê um nível borrado da imagem em vez de texto esmagado.
+        textura.minFilter = LinearMipmapLinearFilter;
         textura.magFilter = LinearFilter;
-        textura.generateMipmaps = false;
+        textura.generateMipmaps = true;
+        textura.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
         textura.needsUpdate = true;
         return textura;
       })();
@@ -402,6 +406,7 @@ export function iniciar() {
     const un = p.material.uniforms;
     un.uFace.value = giro ? 1 : 0;
     un.uSombra.value = giro?.sombra ?? 0;
+    un.uOpacidade.value = giro?.opacidade ?? 1;
     if (giro) {
       (un.uTamanho.value as Vector2).set(caixa.width, caixa.height);
       (un.uPose.value as Vector3).set(giro.x, giro.z, giro.angulo);

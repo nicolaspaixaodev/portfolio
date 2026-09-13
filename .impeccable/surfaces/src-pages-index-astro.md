@@ -51,7 +51,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - **Tambor de serviços no lugar da coluna da home (13/09/2026).** Pedido: "uma seção de destaque [...] a porta de entrada principal pros clientes entenderem os serviços", com rascunho desenhado no tablet. Substitui a coluna de capas e o índice de projetos do FIRST VIEWPORT.
   - Cada linha é um prisma de 4 faces: Creative & Immersive, E-commerce, SaaS e Landing Pages. As faces vizinhas aparecem como frestas inclinadas dos dois lados.
   - O giro sai das setas (painel "Serviços" à direita), da lista, das setas do teclado, do arrasto no toque e do clique numa fresta. As linhas giram em cascata e o ciclo volta ao primeiro serviço.
-  - Cada face mostra só a capa de um projeto, com nome, tipo e ano embaixo. Onde falta projeto, entra uma prévia escura ("Projeto prévia N / Em breve"), que sai quando o projeto chega.
+  - Cada face mostra só a capa de um projeto, com nome, tipo e ano embaixo. Onde falta projeto, entra uma prévia escura ("Projeto prévia N"), com a legenda "Espaço pro próximo projeto de X" e sem prazo prometido. A prévia sai quando o projeto chega.
+  - As peças ficam separadas por um vão e têm cantos arredondados, como no rascunho. O Nicolas pediu "separar e arredondar um pouco as bordas" ao ver a primeira versão, com as faces juntas.
+  - O giro é acionado por setas curvas de giro, no desenho da seta do rascunho.
   - A home abre no primeiro serviço que tem projeto de verdade: hoje, E-commerce, com a Loja Cozinha Autoral.
   - A regra da cor presa nos prints continua valendo nas faces.
 

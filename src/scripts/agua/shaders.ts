@@ -107,6 +107,8 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
   uniform float uFace;
   uniform vec2 uTamanho;
   uniform float uRaio;
+  uniform float uOpacidade;
+  uniform vec3 uPose;
   varying vec2 vUv;
   varying vec2 vLocal;
 
@@ -130,10 +132,12 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     vec2 uvT = uDeslocamento + clamp(uv, 0.0, 1.0) * uEscala;
 
     float separa = 0.0008 * revela + 0.0004 * agua;
+    // Na fresta do tambor (face quase de perfil), só o tom borrado da face vizinha, sem o texto.
+    float desfoque = step(0.5, uFace) * smoothstep(0.5, 0.9, uSombra) * 7.0;
     vec3 cor = vec3(
-      texture2D(uTextura, uvT + vec2(separa, 0.0)).r,
-      texture2D(uTextura, uvT).g,
-      texture2D(uTextura, uvT - vec2(separa, 0.0)).b
+      texture2D(uTextura, uvT + vec2(separa, 0.0), desfoque).r,
+      texture2D(uTextura, uvT, desfoque).g,
+      texture2D(uTextura, uvT - vec2(separa, 0.0), desfoque).b
     );
 
     // Superfície desbotada pelo sol: duas cores, da tinta ao sol, com granulado forte.
@@ -161,8 +165,17 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     final *= mix(1.0, 0.78, abismo * (1.0 - revela));
     final = mix(final, mix(pb, cor, mistura), revela * profundo);
 
-    // Face do tambor virando: escurece conforme sai de frente.
+    // Face do tambor virando: escurece conforme sai de frente, e uma faixa de sol
+    // atravessa a face no meio do giro, pra ela ler como objeto.
     final *= 1.0 - uSombra * 0.7;
+    if (uFace > 0.5) {
+      float xN = vLocal.x / uTamanho.x + 0.5;
+      float lado = uPose.z < 0.0 ? -1.0 : 1.0;
+      float centroFaixa = 0.5 - lado * (uSombra * 1.4 - 0.35);
+      float faixa = exp(-pow((xN - centroFaixa) * 4.5, 2.0));
+      float noGiro = smoothstep(0.08, 0.4, uSombra) * (1.0 - smoothstep(0.7, 0.9, uSombra));
+      final += vec3(0.965, 0.973, 0.969) * faixa * noGiro * 0.16;
+    }
 
     // Some suave logo abaixo do cabeçalho fixo (uCorte em px da tela, de cima).
     float topo = uResolucao.y - uCorte;
@@ -173,6 +186,7 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
       float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRaio;
       visivel *= 1.0 - smoothstep(-0.8, 0.8, dist);
     }
+    visivel *= uOpacidade;
     if (visivel < 0.002) discard;
 
     gl_FragColor = vec4(final, visivel);
@@ -287,7 +301,7 @@ export const FRAGMENTO_FUNDO = /* glsl */ `
     // balançam de lado e sobem quando você desce.
     float aspecto = uResolucao.x / uResolucao.y;
     vec2 ponteiro = (vUv - uPonteiro) * vec2(aspecto, 1.0);
-    float lanterna = exp(-dot(ponteiro, ponteiro) * 14.0) * abismo;
+    float lanterna = exp(-dot(ponteiro, ponteiro) * 9.0) * abismo;
     float neve = 0.0;
     for (int i = 0; i < 3; i++) {
       float fi = float(i);
@@ -312,9 +326,9 @@ export const FRAGMENTO_FUNDO = /* glsl */ `
     }
     float cintila = 0.6 + 0.4 * sin(uTempo * 1.3 + vUv.x * 40.0);
     vec3 corNeve = mix(vec3(0.94, 1.0, 0.97), vec3(0.6, 1.0, 0.9), abismo * 0.5);
-    base += corNeve * neve * (0.07 + fundo * 0.08 + abismo * (0.05 + 0.1 * cintila) + lanterna * 0.55) * agua;
+    base += corNeve * neve * (0.07 + fundo * 0.08 + abismo * (0.05 + 0.1 * cintila) + lanterna * 1.8) * agua;
     // A lanterna do ponteiro: um halo frio e fraco na água escura.
-    base += vec3(0.37, 0.95, 0.86) * lanterna * 0.045 * agua;
+    base += vec3(0.37, 0.95, 0.86) * lanterna * 0.1 * agua;
 
     // Embaixo d'água, o rastro do mouse deixa passar mais luz; no abismo, vira trilha bioluminescente.
     base += vec3(0.94, 1.0, 0.97) * rasgo * agua * 0.1 * (1.0 - abismo);

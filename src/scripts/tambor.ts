@@ -42,6 +42,13 @@ export type Pose = {
   visivel: boolean;
   /** 0 de frente, 1 de perfil: escurece a face que vira. */
   sombra: number;
+  /** A face que passa da fresta pro fundo some antes de ficar de perfil (senão vira um risco). */
+  opacidade: number;
+};
+
+const suave = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
 };
 
 export function pose(d: number, largura: number): Pose {
@@ -49,7 +56,7 @@ export function pose(d: number, largura: number): Pose {
   const lado = d < 0 ? -1 : 1;
   const meia = largura / 2;
   const vao = largura * FRESTA;
-  if (a >= 1.5) return { x: lado * (meia + vao), z: -meia, angulo: (lado * Math.PI) / 2, visivel: false, sombra: 1 };
+  if (a >= 1.5) return { x: lado * (meia + vao), z: -meia, angulo: (lado * Math.PI) / 2, visivel: false, sombra: 1, opacidade: 0 };
   // Até a = 1 a face dobra pela quina, que anda de uma borda até depois do vão; depois fica de perfil e some.
   // No meio do giro as duas faces ficam com o mesmo vão entre si.
   const theta = a <= 1 ? a * ABERTA : ABERTA + (Math.PI / 2 - ABERTA) * ((a - 1) / 0.5);
@@ -60,5 +67,6 @@ export function pose(d: number, largura: number): Pose {
     angulo: lado * theta,
     visivel: true,
     sombra: Math.sin(theta),
+    opacidade: 1 - suave(1.08, 1.4, a),
   };
 }

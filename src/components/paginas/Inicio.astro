@@ -52,7 +52,7 @@ const grade: Face[][] = Array.from({ length: linhas }, (_, i) =>
     const n = i - porServico[k].length;
     return {
       tipo: "previa",
-      nome: t.emBreve,
+      nome: t.previa(n + 1),
       detalhe: t.espacoPara(servico.nome),
       src: previas[n % previas.length],
       alt: `${t.vagaDe} ${servico.nome}`,
@@ -78,10 +78,10 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
       <h2 id="servicos-titulo" class="rotulo servicos-titulo">{t.servicos}</h2>
       <div class="servicos-setas">
         <button class="seta" type="button" data-passo="-1" aria-label={t.servicoAnterior}>
-          <Icone nome="seta-esquerda" />
+          <Icone nome="giro-esquerda" />
         </button>
         <button class="seta" type="button" data-passo="1" aria-label={t.servicoSeguinte}>
-          <Icone nome="seta-direita" />
+          <Icone nome="giro-direita" />
         </button>
       </div>
     </div>
@@ -147,6 +147,16 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
       ))
     }
   </section>
+
+  <!-- No celular, com as capas na tela, as setas de giro ficam à mão, no canto oposto ao WhatsApp -->
+  <div class="tambor-flutuante" role="group" aria-label={t.servicos}>
+    <button class="seta" type="button" data-passo="-1" aria-label={t.servicoAnterior} tabindex="-1">
+      <Icone nome="giro-esquerda" />
+    </button>
+    <button class="seta" type="button" data-passo="1" aria-label={t.servicoSeguinte} tabindex="-1">
+      <Icone nome="giro-direita" />
+    </button>
+  </div>
 
   <footer class="inicio-rodape" data-anim data-atraso="0.45">
     <Contato lang={lang} />
@@ -215,8 +225,8 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
   }
 
   .seta :global(svg) {
-    width: 1.05rem;
-    height: 1.05rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 
   .seta:hover {
@@ -402,12 +412,42 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
   }
 
   .inicio-rodape {
-    padding: 3rem var(--margem) 5.5rem;
+    /* no celular, espaço pro WhatsApp fixo e pra linha d'água sem cobrir o e-mail */
+    padding: 3rem var(--margem) calc(2.75rem + 3.5rem + 2 * var(--margem));
     display: grid;
     gap: 2rem;
   }
 
+  .tambor-flutuante {
+    display: none;
+  }
+
   @media (max-width: 1023px) {
+    .tambor-flutuante {
+      position: fixed;
+      left: var(--margem);
+      bottom: var(--margem);
+      z-index: 20;
+      display: flex;
+      gap: 0.5rem;
+      opacity: 0;
+      transform: translateY(0.75rem);
+      pointer-events: none;
+      transition:
+        opacity 400ms var(--ease-agua),
+        transform 600ms var(--ease-agua);
+    }
+
+    .tambor-flutuante.a-mao {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .tambor-flutuante .seta {
+      background: var(--bg);
+    }
+
     .inicio-rodape :global(.contato-whatsapp) {
       position: fixed;
       right: var(--margem);
@@ -556,7 +596,10 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
         const p = pose(d, largura);
         face.style.transform = `translate3d(${p.x.toFixed(2)}px, 0, ${p.z.toFixed(2)}px) rotateY(${p.angulo.toFixed(4)}rad)`;
         face.style.visibility = p.visivel ? "" : "hidden";
-        face.style.filter = p.sombra > 0.01 ? `brightness(${(1 - p.sombra * 0.7).toFixed(3)})` : "";
+        face.style.opacity = p.opacidade < 1 ? p.opacidade.toFixed(3) : "";
+        // Na fresta, só o tom borrado da face vizinha (igual ao WebGL), sem o texto esmagado.
+        const borrado = Math.min(1, Math.max(0, (p.sombra - 0.5) / 0.4)) * 7;
+        face.style.filter = p.sombra > 0.01 ? `brightness(${(1 - p.sombra * 0.7).toFixed(3)})${borrado > 0.1 ? ` blur(${borrado.toFixed(1)}px)` : ""}` : "";
       });
       const frente = modulo(linha.valor);
       if (frente === linha.frente) return;
@@ -674,6 +717,29 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
     };
     gsap.ticker.add(vigiarCabecalho);
     limpezas.push(() => gsap.ticker.remove(vigiarCabecalho));
+
+    // Celular: as setas flutuantes aparecem quando as capas estão na tela e as do painel não.
+    const flutuante = inicio.querySelector<HTMLElement>(".tambor-flutuante");
+    const setasPainel = inicio.querySelector<HTMLElement>(".servicos-setas");
+    if (flutuante && setasPainel && coluna) {
+      let colunaNaTela = false;
+      let painelNaTela = true;
+      const atualizar = () => {
+        const mostrar = colunaNaTela && !painelNaTela;
+        flutuante.classList.toggle("a-mao", mostrar);
+        flutuante.querySelectorAll("button").forEach((b) => (b.tabIndex = mostrar ? 0 : -1));
+      };
+      const vigia = new IntersectionObserver((entradas) => {
+        for (const e of entradas) {
+          if (e.target === coluna) colunaNaTela = e.isIntersecting;
+          else painelNaTela = e.isIntersecting;
+        }
+        atualizar();
+      });
+      vigia.observe(coluna);
+      vigia.observe(setasPainel);
+      limpezas.push(() => vigia.disconnect());
+    }
 
     // A largura muda com a janela; as faces recalculam.
     const observador = new ResizeObserver(() => linhas.forEach(aplicar));

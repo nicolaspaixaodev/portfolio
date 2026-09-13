@@ -1,6 +1,6 @@
 ---
 interface Props {
-  nome: "seta-diagonal" | "seta-esquerda" | "seta-direita" | "lanterna";
+  nome: "seta-diagonal" | "seta-esquerda" | "seta-direita" | "lanterna" | "giro-esquerda" | "giro-direita";
   class?: string;
 }
 const { nome, class: classe } = Astro.props;
@@ -19,5 +19,7 @@ const { nome, class: classe } = Astro.props;
   {nome === "seta-diagonal" && <path d="M4.5 11.5l7-7M5.5 4.5h6v6" />}
   {nome === "seta-esquerda" && <path d="M13 8H3.5M7.5 4L3.5 8l4 4" />}
   {nome === "seta-direita" && <path d="M3 8h9.5M8.5 4l4 4-4 4" />}
+  {nome === "giro-direita" && <path d="M2 10.5C3.6 5.6 11.6 5.2 13.8 9.8M14.1 6.4l-.2 3.6-3.5-.5" />}
+  {nome === "giro-esquerda" && <path d="M14 10.5C12.4 5.6 4.4 5.2 2.2 9.8M1.9 6.4l.2 3.6 3.5-.5" />}
   {nome === "lanterna" && <path d="M2.5 14.5C2.5 8 5.5 4 10 3.5M12 5.8a2.3 2.3 0 1 0 0-.01" />}
 </svg>
