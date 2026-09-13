@@ -69,7 +69,12 @@ export function iniciarProfundidade(lenis: Lenis) {
 
   // Troca de página: o nível salvo volta a valer.
   document.addEventListener("astro:after-swap", () => {
-    const i = NIVEIS.indexOf((raiz.dataset.depth ?? "superficie") as (typeof NIVEIS)[number]);
+    // O roteador troca os atributos do <html> na hora da troca; a profundidade certa é a salva.
+    let salvo: string | null = null;
+    try {
+      salvo = localStorage.getItem("profundidade");
+    } catch {}
+    const i = NIVEIS.indexOf((salvo ?? raiz.dataset.depth ?? "superficie") as (typeof NIVEIS)[number]);
     if (i >= 0 && Math.round(estado.profundidade) !== i) {
       gsap.killTweensOf(estado);
       estado.profundidade = i;
