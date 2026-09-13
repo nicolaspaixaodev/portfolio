@@ -67,6 +67,7 @@ export function pose(d: number, largura: number): Pose {
     angulo: lado * theta,
     visivel: true,
     sombra: Math.sin(theta),
-    opacidade: 1 - suave(1.08, 1.4, a),
+    // Passando de a ≈ 1,13 a face dobra por trás da própria quina e vira um risco: some antes.
+    opacidade: 1 - suave(1.0, 1.12, a),
   };
 }
