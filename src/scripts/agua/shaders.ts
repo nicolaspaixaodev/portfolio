@@ -49,6 +49,7 @@ export const VERTICE_IMAGEM = /* glsl */ `
   uniform vec3 uPose;
   uniform float uFoco;
   varying vec2 vUv;
+  varying vec2 vLocal;
 
   void main() {
     vUv = uv;
@@ -72,6 +73,7 @@ export const VERTICE_IMAGEM = /* glsl */ `
 
     // Face do tambor da home: gira no próprio eixo com a perspectiva centrada na linha
     // (uPose = x, z, ângulo). O plano continua chapado em z = 0; só os vértices andam.
+    vLocal = position.xy * uTamanho;
     if (uFace > 0.5) {
       vec2 v = p.xy * uTamanho;
       float c = cos(uPose.z);
@@ -80,6 +82,9 @@ export const VERTICE_IMAGEM = /* glsl */ `
       float k = uFoco / (uFoco - r.z);
       vec4 centro = modelMatrix * vec4(0.0, 0.0, 0.0, 1.0);
       mundo = vec4(centro.xy + r.xy * k, 0.0, 1.0);
+      // Curva de tambor na vertical: perto do topo e da base da tela, a linha estreita um pouco.
+      float yT = clamp(mundo.y / (uViewport.y * 0.5), -1.2, 1.2);
+      mundo.x = centro.x + (mundo.x - centro.x) * (1.0 - 0.09 * yT * yT);
     }
 
     gl_Position = projectionMatrix * viewMatrix * mundo;
@@ -99,7 +104,11 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
   uniform float uCheia;
   uniform float uSombra;
   uniform float uCorte;
+  uniform float uFace;
+  uniform vec2 uTamanho;
+  uniform float uRaio;
   varying vec2 vUv;
+  varying vec2 vLocal;
 
   ${RUIDO}
 
@@ -158,6 +167,12 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     // Some suave logo abaixo do cabeçalho fixo (uCorte em px da tela, de cima).
     float topo = uResolucao.y - uCorte;
     float visivel = 1.0 - smoothstep(topo - 28.0, topo, gl_FragCoord.y) * step(0.5, uCorte);
+    // Cantos arredondados nas faces do tambor.
+    if (uFace > 0.5) {
+      vec2 q = abs(vLocal) - (uTamanho * 0.5 - uRaio);
+      float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRaio;
+      visivel *= 1.0 - smoothstep(-0.8, 0.8, dist);
+    }
     if (visivel < 0.002) discard;
 
     gl_FragColor = vec4(final, visivel);

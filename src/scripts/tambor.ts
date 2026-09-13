@@ -18,6 +18,12 @@ const ABERTA = (68 * Math.PI) / 180;
  */
 export const FOCO = 2.2;
 
+/** Vão entre a face da frente e as vizinhas, em larguras de face (o rascunho separa as peças). */
+export const FRESTA = 0.06;
+
+/** Raio dos cantos das faces, em px. */
+export const RAIO = 10;
+
 /** Quanto falta pra face chegar à frente, entre -2 e 2 (0 = de frente). */
 export function distancia(face: number, giro: number) {
   let d = (face - giro) % FACES;
@@ -42,10 +48,12 @@ export function pose(d: number, largura: number): Pose {
   const a = Math.min(Math.abs(d), 2);
   const lado = d < 0 ? -1 : 1;
   const meia = largura / 2;
-  if (a >= 1.5) return { x: lado * meia, z: -meia, angulo: (lado * Math.PI) / 2, visivel: false, sombra: 1 };
-  // Até a = 1 a face dobra pela quina que anda de uma borda à outra; depois fica de perfil e some.
+  const vao = largura * FRESTA;
+  if (a >= 1.5) return { x: lado * (meia + vao), z: -meia, angulo: (lado * Math.PI) / 2, visivel: false, sombra: 1 };
+  // Até a = 1 a face dobra pela quina, que anda de uma borda até depois do vão; depois fica de perfil e some.
+  // No meio do giro as duas faces ficam com o mesmo vão entre si.
   const theta = a <= 1 ? a * ABERTA : ABERTA + (Math.PI / 2 - ABERTA) * ((a - 1) / 0.5);
-  const quina = a <= 1 ? -meia + largura * a : meia;
+  const quina = a <= 1 ? -meia + (largura + vao) * a : meia + vao;
   return {
     x: lado * (quina + meia * Math.cos(theta)),
     z: -meia * Math.sin(theta),

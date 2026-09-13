@@ -23,7 +23,7 @@ import { FRAGMENTO_FUNDO, FRAGMENTO_IMAGEM, FRAGMENTO_TITULO, VERTICE_IMAGEM, VE
 import { estado } from "../estado";
 import { criarAbismo } from "./abismo";
 import { criarCamadaTextos } from "./textos";
-import { FOCO, pose } from "../tambor";
+import { FOCO, RAIO, pose } from "../tambor";
 
 type Plano = {
   el: HTMLElement;
@@ -163,6 +163,7 @@ export function iniciar() {
         uTamanho: { value: new Vector2(1, 1) },
         uPose: { value: new Vector3() },
         uFoco: { value: 1 },
+        uRaio: { value: RAIO },
       },
     });
     const mesh = new Mesh(geometria, material);
