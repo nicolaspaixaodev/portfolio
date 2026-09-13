@@ -282,21 +282,6 @@ function midias() {
   pararMidias = () => limpezas.forEach((f) => f());
 }
 
-/** Revela a cor inteira de uma mídia (usado pelo índice). */
-export function encher(midia: HTMLElement | null, cheia: boolean) {
-  if (!midia || !comMouse.matches) return;
-  midia.dataset.cheia = cheia ? "1" : "0";
-  const caixa = midia.getBoundingClientRect();
-  gsap.to(midia, {
-    "--mx": `${caixa.width / 2}px`,
-    "--my": `${caixa.height / 2}px`,
-    "--r": cheia ? `${Math.hypot(caixa.width, caixa.height)}px` : "0px",
-    duration: cheia ? 1.6 : 1,
-    ease: cheia ? AGUA : "power2.out",
-    overwrite: "auto",
-  });
-}
-
 /* ---------- Ciclo das páginas ---------- */
 
 /* ---------- A camada de baixo (WebGL) ---------- */

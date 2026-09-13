@@ -83,13 +83,15 @@ const { src, alt, widths, sizes, loading = "lazy", prioridade = false, nome, cla
 
   /* Embaixo d'água, a cor aparece inteira */
   :global(:root[data-depth="raso"]) .midia :global(.midia-cor),
-  :global(:root[data-depth="fundo"]) .midia :global(.midia-cor) {
+  :global(:root[data-depth="fundo"]) .midia :global(.midia-cor),
+  :global(:root[data-depth="abismo"]) .midia :global(.midia-cor) {
     -webkit-mask-image: none;
     mask-image: none;
   }
 
   :global(:root[data-depth="raso"]) .midia-grao,
-  :global(:root[data-depth="fundo"]) .midia-grao {
+  :global(:root[data-depth="fundo"]) .midia-grao,
+  :global(:root[data-depth="abismo"]) .midia-grao {
     opacity: 0;
   }
 

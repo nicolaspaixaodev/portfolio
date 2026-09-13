@@ -101,7 +101,6 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
   uniform float uTempo;
   uniform float uProfundidade;
   uniform float uSempreCor;
-  uniform float uCheia;
   uniform float uSombra;
   uniform float uCorte;
   uniform float uFace;
@@ -148,7 +147,7 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     vec3 solCor = vec3(0.965, 0.973, 0.969);
     vec3 pb = mix(tintaCor, solCor, luma);
 
-    float mistura = max(max(max(revela, agua), uSempreCor), uCheia);
+    float mistura = max(max(revela, agua), uSempreCor);
     // No escuro é o contrário: dentro da pincelada a foto volta a ser a da superfície.
     mistura = mix(mistura, 1.0 - revela, profundo);
     vec3 final = mix(pb, cor, mistura);

@@ -156,7 +156,8 @@ A licença não pôde ser conferida (a página do Fab responde 403 sem login). O
 | 5.7 | Casos de borda com as novidades | **feito**: movimento reduzido, sem WebGL, celular no Abismo, EN, 404. Bug corrigido: depois da navegação, `profundidade.ts` lia `data-depth` já resetado pelo roteador; agora lê o localStorage |
 | 5.8 | Git e GitHub | **feito**: https://github.com/nicolaspaixaodev/portfolio (público, branch `main`). Autor Nicolas e **sem** Co-Authored-By (pedido dele, na memória). `.impeccable/review/` e `public/modelos/*.glb` ficam fora do Git (peso e licença); o README explica como repor os modelos. Deploy continua pela CLI (`npx vercel deploy --prod`), sem integração Git na Vercel |
 | 5.9 | Revisão independente das mudanças novas (Abismo, textos, carrosséis) | **disposição `fix`** (13/09/2026), 6 correções, todas aplicadas (ver "Tambor de serviços e correções da 5.9") |
-| 5.10 | Tambor de serviços na home (pedido do Nicolas com rascunho) | **feito**, aguardando nova revisão |
+| 5.10 | Tambor de serviços na home (pedido do Nicolas com rascunho) | **feito e no ar** (13/09/2026). Revisão: disposição `ship` depois de 4 rodadas. O Nicolas pediu, no meio, "separar e arredondar um pouco as bordas" |
+| 5.11 | `DESIGN.md` regerado (tambor e 4 profundidades) | ver commit |
 
 **Lighthouse depois das correções (no ar):** celular 98/100/100/100 (TBT 10 ms, LCP 2,1 s).
 
@@ -221,4 +222,20 @@ Pendências do Nicolas:
 4. **Contrato:** registra o Abismo, a pincelada que inverte, a roda no carrossel e o tambor. O FORM lista as 4 profundidades. **Falta** regerar o DESIGN.md.
 5. **Rótulos na descida:** com `:root.descendo`, `--fg-2` vira tinta.
 6. **Partículas:** viraram neve marinha, com flocos irregulares em 3 camadas, desfoque por distância e deriva. A lanterna do ponteiro (`uPonteiro`) acende os flocos por perto e deixa um halo fraco.
+
+**Rodadas da revisão do tambor (13/09/2026):**
+- **Retorno do Nicolas:** faces separadas por um vão de 6%, cantos de 10 px e curva vertical sutil (9%), na pegada da coluna do Segerman.
+- **Revisão:**
+  - Setas curvas de giro (ícones `giro-esquerda` e `giro-direita`).
+  - Frestas só com o tom borrado da vizinha: mipmaps e bias no WebGL, desfoque recortado dentro da `.midia` no CSS.
+  - Cantos das frestas redondos na tela: SDF achatado por |cos θ| e border-radius elíptico.
+  - A face some antes de dobrar por trás da quina (opacidade de 1 a 0 entre a = 1,0 e 1,12).
+  - Legendas sem sobreposição: a que sai some em 180 ms e a que entra começa em 280 ms.
+  - Prévias sem "Em breve" (não prometer prazo).
+  - Setas flutuantes no celular quando as capas estão na tela.
+  - Rodapé do celular com espaço pro WhatsApp fixo.
+  - Lanterna mais forte.
+- **Depuração:**
+  - `?giro-parado=0.4` trava o giro no meio.
+  - `?tinta-parada` não dissipa a pincelada.
 

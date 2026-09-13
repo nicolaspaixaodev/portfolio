@@ -39,7 +39,6 @@ type Plano = {
   face: HTMLElement | null;
   espaco: HTMLElement | null;
   pronto: boolean;
-  cheia: number;
   proporcao: number;
 };
 
@@ -154,7 +153,6 @@ export function iniciar() {
         uTempo: { value: 0 },
         uProfundidade: { value: profundidade.valor },
         uSempreCor: { value: opcoes.sempreCor ? 1 : 0 },
-        uCheia: { value: 0 },
         uVelocidade: { value: 0 },
         uEixo: { value: opcoes.eixo },
         uCurva: { value: 0 },
@@ -184,7 +182,6 @@ export function iniciar() {
       face,
       espaco: face?.closest<HTMLElement>(".tambor") ?? null,
       pronto: false,
-      cheia: 0,
       proporcao: 1,
     };
 
@@ -520,9 +517,6 @@ export function iniciar() {
       u.uVelocidade.value = p.eixo === 0 ? estado.rolagem : estado.carrossel;
       u.uCurva.value = p.eixo === 1 ? curva : 0;
       u.uCorte.value = p.face ? corte : 0;
-      // o nome do projeto no índice enche a foto de cor
-      p.cheia += ((p.el.dataset.cheia === "1" ? 1 : 0) - p.cheia) * 0.06;
-      u.uCheia.value = p.cheia;
     }
 
     for (const t of titulos) atualizarTitulo(t, tempo);
