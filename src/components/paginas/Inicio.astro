@@ -305,10 +305,11 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
     line-height: 1.45;
     color: var(--fg-2);
     text-wrap: pretty;
+    /* o texto que sai some rápido; o que entra só começa depois, pra nunca haver dois no mesmo lugar */
     transition:
-      opacity 500ms var(--ease-agua),
-      transform 700ms var(--ease-agua),
-      visibility 0s linear 700ms;
+      opacity 200ms ease-out,
+      transform 300ms ease-out,
+      visibility 0s linear 300ms;
   }
 
   .servicos-foco[data-ativo="false"] {
@@ -318,7 +319,10 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
   }
 
   .servicos-foco[data-ativo="true"] {
-    transition-delay: 120ms, 120ms, 0s;
+    transition:
+      opacity 500ms var(--ease-agua) 260ms,
+      transform 700ms var(--ease-agua) 260ms,
+      visibility 0s linear 0s;
   }
 
   /* ---------- Tambor ---------- */
@@ -348,14 +352,28 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
     inset: 0;
     display: block;
     outline-offset: 4px;
-    border-radius: 10px;
     will-change: transform;
   }
 
   .tambor-face :global(.midia) {
     width: 100%;
     height: 100%;
-    border-radius: 10px;
+    /* o raio na horizontal cresce com o giro, pra fresta achatada ter canto redondo na tela */
+    border-radius: var(--raio-x, 10px) / 10px;
+  }
+
+  /* Na fresta, o desfoque fica dentro da própria face (a .midia recorta) */
+  .tambor-face :global(.midia .midia-base) {
+    filter: grayscale(1) contrast(1.08) brightness(1.03) blur(var(--borrado, 0px));
+  }
+
+  .tambor-face :global(.midia .midia-cor) {
+    filter: blur(var(--borrado, 0px));
+  }
+
+  /* a imagem borrada cresce um pouco, pra borda da fresta não clarear com o desfoque */
+  .tambor-face :global(.midia img) {
+    transform: scale(var(--cobre, 1));
   }
 
   /* Clicar na fresta de uma face vizinha gira até ela */
@@ -396,9 +414,9 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
     align-items: baseline;
     gap: 0.1rem 0.6rem;
     transition:
-      opacity 450ms var(--ease-agua),
-      transform 650ms var(--ease-agua),
-      visibility 0s linear 650ms;
+      opacity 180ms ease-out,
+      transform 300ms ease-out,
+      visibility 0s linear 300ms;
   }
 
   .tambor-legenda-face[data-ativo="false"] {
@@ -408,7 +426,10 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
   }
 
   .tambor-legenda-face[data-ativo="true"] {
-    transition-delay: 180ms, 180ms, 0s;
+    transition:
+      opacity 450ms var(--ease-agua) 280ms,
+      transform 650ms var(--ease-agua) 280ms,
+      visibility 0s linear 0s;
   }
 
   .inicio-rodape {
@@ -597,9 +618,13 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
         face.style.transform = `translate3d(${p.x.toFixed(2)}px, 0, ${p.z.toFixed(2)}px) rotateY(${p.angulo.toFixed(4)}rad)`;
         face.style.visibility = p.visivel ? "" : "hidden";
         face.style.opacity = p.opacidade < 1 ? p.opacidade.toFixed(3) : "";
-        // Na fresta, só o tom borrado da face vizinha (igual ao WebGL), sem o texto esmagado.
-        const borrado = Math.min(1, Math.max(0, (p.sombra - 0.5) / 0.4)) * 7;
-        face.style.filter = p.sombra > 0.01 ? `brightness(${(1 - p.sombra * 0.7).toFixed(3)})${borrado > 0.1 ? ` blur(${borrado.toFixed(1)}px)` : ""}` : "";
+        face.style.filter = p.sombra > 0.01 ? `brightness(${(1 - p.sombra * 0.7).toFixed(3)})` : "";
+        // Na fresta, só o tom borrado da face vizinha (igual ao WebGL). O desfoque é aplicado antes
+        // do achatamento, então precisa ser grande pra apagar o texto depois de espremido.
+        const borrado = Math.min(1, Math.max(0, (p.sombra - 0.5) / 0.4)) * 44;
+        face.style.setProperty("--borrado", `${borrado.toFixed(1)}px`);
+        face.style.setProperty("--cobre", (1 + borrado * 0.007).toFixed(3));
+        face.style.setProperty("--raio-x", `${(10 / Math.max(Math.abs(Math.cos(p.angulo)), 0.1)).toFixed(1)}px`);
       });
       const frente = modulo(linha.valor);
       if (frente === linha.frente) return;
@@ -657,6 +682,9 @@ const inicial = Math.max(0, porServico.findIndex((lista) => lista.length > 0));
     };
 
     marcarServico(modulo(alvo), false);
+    // Só pra conferir numa captura: ?giro-parado=0.4 trava todas as linhas no meio do giro.
+    const parado = Number(new URLSearchParams(location.search).get("giro-parado"));
+    if (!Number.isNaN(parado) && parado !== 0) linhas.forEach((l) => (l.valor = alvo + parado));
     linhas.forEach(aplicar);
 
     inicio.querySelectorAll<HTMLElement>("[data-passo]").forEach((botao) => ouvir(botao, "click", () => passo(Number(botao.dataset.passo))));

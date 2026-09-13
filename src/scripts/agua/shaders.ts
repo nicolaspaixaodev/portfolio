@@ -180,11 +180,15 @@ export const FRAGMENTO_IMAGEM = /* glsl */ `
     // Some suave logo abaixo do cabeçalho fixo (uCorte em px da tela, de cima).
     float topo = uResolucao.y - uCorte;
     float visivel = 1.0 - smoothstep(topo - 28.0, topo, gl_FragCoord.y) * step(0.5, uCorte);
-    // Cantos arredondados nas faces do tambor.
+    // Cantos arredondados nas faces do tambor. A conta é feita já achatada pelo giro,
+    // pra fresta (quase de perfil) ter o mesmo raio na tela e borda sem serrilhado.
     if (uFace > 0.5) {
-      vec2 q = abs(vLocal) - (uTamanho * 0.5 - uRaio);
+      float achata = max(abs(cos(uPose.z)), 0.1);
+      vec2 local = vLocal * vec2(achata, 1.0);
+      vec2 meio = uTamanho * 0.5 * vec2(achata, 1.0);
+      vec2 q = abs(local) - (meio - uRaio - 0.75);
       float dist = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - uRaio;
-      visivel *= 1.0 - smoothstep(-0.8, 0.8, dist);
+      visivel *= 1.0 - smoothstep(-0.9, 0.6, dist);
     }
     visivel *= uOpacidade;
     if (visivel < 0.002) discard;
