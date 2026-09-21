@@ -1,0 +1,229 @@
+<title>Proposta de conteúdo do portfólio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@150,800&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #f6f8f7;
+    --fg: #0b1f24;
+    --fg-2: #4a5f64;
+    --fio: rgb(11 31 36 / 0.14);
+    --realce: #1fa396;
+    --realce-fundo: rgb(31 163 150 / 0.1);
+    --pino: #ffd23f;
+    --aviso-fundo: rgb(255 210 63 / 0.22);
+    --display: "Anybody", "Arial Black", system-ui, sans-serif;
+    --texto: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #04151b; --fg: #effff8; --fg-2: #8fb9b4; --fio: rgb(239 255 248 / 0.14);
+      --realce: #5fd3c4; --realce-fundo: rgb(95 211 196 / 0.1); --aviso-fundo: rgb(255 210 63 / 0.14);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #04151b; --fg: #effff8; --fg-2: #8fb9b4; --fio: rgb(239 255 248 / 0.14);
+    --realce: #5fd3c4; --realce-fundo: rgb(95 211 196 / 0.1); --aviso-fundo: rgb(255 210 63 / 0.14);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.55 var(--texto); }
+  ::selection { background: var(--pino); color: #0b1f24; }
+  main { max-width: 46rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  h1, h2 { font-family: var(--display); font-stretch: 150%; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; line-height: 0.95; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2rem, 7vw, 3.4rem); }
+  h2 { font-size: clamp(1.15rem, 3.4vw, 1.5rem); margin-top: 3.5rem; padding-top: 1rem; border-top: 3px solid var(--pino); display: inline-block; }
+  h3 { font-size: 1.05rem; margin: 0; }
+  p { margin: 0.6rem 0 0; max-width: 65ch; }
+  .suave { color: var(--fg-2); }
+  .abre { margin-top: 1.1rem; font-size: 1.1rem; }
+  .ponto { margin-top: 1.5rem; padding: 0.9rem 1rem; background: var(--realce-fundo); border-radius: 6px; font-size: 0.95rem; }
+  .ponto code, code { font-size: 0.9em; background: var(--fio); padding: 0.05em 0.35em; border-radius: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.95rem; }
+  th, td { text-align: left; vertical-align: top; padding: 0.55rem 0.75rem 0.55rem 0; border-bottom: 1px solid var(--fio); }
+  th { font-size: 0.8rem; font-weight: 600; color: var(--fg-2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .rolar { overflow-x: auto; }
+  .mapa { margin-top: 1rem; padding: 0; list-style: none; font-size: 0.97rem; }
+  .mapa li { padding: 0.35rem 0; }
+  .mapa ul { list-style: none; padding-left: 1.25rem; margin: 0.2rem 0 0; border-left: 1px solid var(--fio); }
+  .novo { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--realce); margin-left: 0.4rem; }
+  .itens { list-style: none; padding: 0; margin: 1.25rem 0 0; display: grid; gap: 0; }
+  .item { display: grid; grid-template-columns: 3.2rem 1fr; gap: 0 0.9rem; padding: 1.15rem 0; border-bottom: 1px solid var(--fio); }
+  .id { font-family: var(--display); font-stretch: 150%; font-weight: 800; font-size: 1.1rem; color: var(--realce); padding-top: 0.05rem; }
+  .item ul { margin: 0.5rem 0 0; padding-left: 1.1rem; }
+  .item li { margin-top: 0.2rem; }
+  .selos { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+  .selo { font-size: 0.78rem; padding: 0.15rem 0.55rem; border: 1px solid var(--fio); border-radius: 999px; color: var(--fg-2); }
+  .selo.dele { background: var(--aviso-fundo); border-color: transparent; color: var(--fg); }
+  .perguntas { margin-top: 1rem; padding-left: 1.25rem; }
+  .perguntas li { margin-top: 0.55rem; padding-left: 0.2rem; }
+  .perguntas li::marker { color: var(--realce); font-weight: 600; }
+  .fora { margin-top: 1rem; padding-left: 1.1rem; }
+  .fora li { margin-top: 0.4rem; }
+  .resposta { margin-top: 3.5rem; padding: 1.25rem; border: 1.5px solid var(--fg); border-radius: 8px; }
+  .resposta p:first-child { margin-top: 0; }
+  .exemplo { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.9rem; background: var(--fio); padding: 0.5rem 0.7rem; border-radius: 4px; display: inline-block; margin-top: 0.6rem; }
+  @media (max-width: 34rem) { .item { grid-template-columns: 2.5rem 1fr; } }
+</style>
+
+<main>
+  <p class="suave">nicolaspaixao.com.br · v1 com água e Abismo · 20/09/2026</p>
+  <h1>Proposta de conteúdo</h1>
+  <p class="abre">Hoje o site impressiona, mas quem entra ainda sai sem saber quanto tempo leva, como funciona o pagamento, o que vem incluso e o que acontece depois da entrega. A proposta junta tudo isso numa página nova, <strong>Como funciona</strong>, e enriquece as páginas que já existem, sem mexer no tambor nem na água.</p>
+  <p class="ponto"><strong>Ponto de retorno pronto.</strong> O estado atual está marcado no GitHub com a tag <code>v1-antes-do-conteudo</code>. O trabalho novo vai num ramo separado e só vai pro ar com o seu OK. Se não curtir, voltamos exatamente pra cá, e a Vercel também guarda a versão publicada de hoje.</p>
+
+  <h2>O que tem e o que falta</h2>
+  <div class="rolar">
+    <table>
+      <thead><tr><th>Tema</th><th>Hoje no site</th><th>Falta</th></tr></thead>
+      <tbody>
+        <tr><td>Serviços</td><td>4 abas no tambor, com uma frase cada</td><td>Pra quem é, o que entra, prazo e exemplo</td></tr>
+        <tr><td>Como trabalho</td><td>Nada</td><td>As etapas, da primeira mensagem à publicação</td></tr>
+        <tr><td>Dúvidas</td><td>Nada</td><td>FAQ com preço, prazo, pagamento e manutenção</td></tr>
+        <tr><td>Garantias</td><td>Só implícitas no próprio site</td><td>O que vem em todo projeto, por escrito</td></tr>
+        <tr><td>Projeto</td><td>Galeria, resumo, ano, tipo, função e link</td><td>Desafio, o que foi feito, destaques técnicos e stack</td></tr>
+        <tr><td>Sobre</td><td>Rascunho factual, sem foto</td><td>Texto seu, foto e disponibilidade</td></tr>
+        <tr><td>Contato</td><td>E-mail e WhatsApp</td><td>Tempo de resposta, redes e mensagem pronta por serviço</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Como fica o site</h2>
+  <ul class="mapa">
+    <li><strong>Início</strong>: o tambor continua igual. O painel "Serviços" ganha o link "Ver detalhes", que leva ao serviço da aba aberta.</li>
+    <li><strong>Como funciona</strong> <span class="novo">nova</span>
+      <ul>
+        <li>Serviços em detalhe (as 4 abas)</li>
+        <li>Como trabalho (processo)</li>
+        <li>Incluso em todo projeto</li>
+        <li>Perguntas frequentes</li>
+        <li>Vamos conversar (contato)</li>
+      </ul>
+    </li>
+    <li><strong>Projeto</strong>: o case ganha seções novas embaixo da galeria.</li>
+    <li><strong>Sobre</strong>: o texto é reescrito com você.</li>
+    <li><strong>Cabeçalho</strong>: Sobre · Como funciona · PT/EN · profundidade.</li>
+  </ul>
+  <p class="suave">A página nova usa o mesmo mundo: tipografia, sol e água, pincelada e profundidades. Rolando, você desce pelos níveis da página.</p>
+
+  <h2>Itens pra aprovar</h2>
+  <ol class="itens">
+    <li class="item"><span class="id">A1</span><div>
+      <h3>Página "Como funciona" (PT e EN)</h3>
+      <p>A casa dos itens A2 a A5, com link no cabeçalho, no rodapé e no painel de serviços. Endereços: <code>/como-funciona/</code> e <code>/en/how-it-works/</code>.</p>
+      <div class="selos"><span class="selo">nova página</span><span class="selo">esforço grande</span></div>
+    </div></li>
+    <li class="item"><span class="id">A2</span><div>
+      <h3>Serviços em detalhe</h3>
+      <p>Um bloco por aba (Creative &amp; Immersive, E-commerce, SaaS, Landing Pages):</p>
+      <ul>
+        <li>pra quem é;</li>
+        <li>o que entra (páginas, integrações, painel);</li>
+        <li>prazo típico;</li>
+        <li>o projeto de exemplo daquela aba;</li>
+        <li>um botão de WhatsApp com a mensagem já escrita, por exemplo "Oi, Nicolas! Quero uma landing page".</li>
+      </ul>
+      <div class="selos"><span class="selo">esforço médio</span><span class="selo dele">prazos e preço dependem de você</span></div>
+    </div></li>
+    <li class="item"><span class="id">A3</span><div>
+      <h3>Como trabalho</h3>
+      <p>Cinco etapas em ordem: conversa → proposta com valor e prazo → design → desenvolvimento com prévias no ar → publicação e acompanhamento. Cada etapa diz o que você faz e o que o cliente recebe.</p>
+      <div class="selos"><span class="selo">esforço pequeno</span></div>
+    </div></li>
+    <li class="item"><span class="id">A4</span><div>
+      <h3>Incluso em todo projeto</h3>
+      <p>O padrão de entrega, com prova no próprio portfólio (97 a 100 no Lighthouse em 13/09, a remedir na entrega):</p>
+      <ul>
+        <li>feito primeiro pro celular;</li>
+        <li>carregamento rápido;</li>
+        <li>SEO básico (título, descrição, sitemap e prévia de link);</li>
+        <li>domínio e hospedagem configurados;</li>
+        <li>acessos e código entregues;</li>
+        <li>PT/EN quando fizer sentido.</li>
+      </ul>
+      <p>Só entra o que você confirmar que entrega sempre.</p>
+      <div class="selos"><span class="selo">esforço pequeno</span><span class="selo dele">você confirma a lista</span></div>
+    </div></li>
+    <li class="item"><span class="id">A5</span><div>
+      <h3>Perguntas frequentes</h3>
+      <p>Umas 10 perguntas em sanfona, reaproveitando e revisando os textos que já estão escritos na v2:</p>
+      <ul>
+        <li>Quanto custa?</li>
+        <li>Quanto tempo leva?</li>
+        <li>Como é o pagamento?</li>
+        <li>O que preciso mandar?</li>
+        <li>Consigo editar sozinho depois?</li>
+        <li>O domínio e o site ficam no meu nome?</li>
+        <li>Aparece no Google?</li>
+        <li>Você usa template?</li>
+        <li>Faz manutenção?</li>
+        <li>Atende fora de Aracaju?</li>
+      </ul>
+      <div class="selos"><span class="selo">esforço médio</span><span class="selo dele">respostas com fatos seus</span></div>
+    </div></li>
+    <li class="item"><span class="id">A6</span><div>
+      <h3>Link "Ver detalhes" no tambor</h3>
+      <p>Embaixo do texto do serviço aberto, leva direto ao bloco dele na página nova. O rodapé também ganha "Como funciona · Perguntas".</p>
+      <div class="selos"><span class="selo">esforço pequeno</span></div>
+    </div></li>
+    <li class="item"><span class="id">A7</span><div>
+      <h3>Case do projeto mais completo</h3>
+      <p>Embaixo da galeria da Loja Cozinha Autoral entram três seções:</p>
+      <ul>
+        <li>"O desafio";</li>
+        <li>"O que eu fiz";</li>
+        <li>"Destaques técnicos", com cupom com horário, pedido formatado no WhatsApp e painel de pedidos.</li>
+      </ul>
+      <p>Também entra a stack (React, TypeScript, Tailwind, Supabase). Continua rotulado como projeto conceito, sem nenhum número inventado.</p>
+      <div class="selos"><span class="selo">esforço médio</span></div>
+    </div></li>
+    <li class="item"><span class="id">A8</span><div>
+      <h3>Sobre de verdade</h3>
+      <p>Reescrito com você: quem é, como pensa um projeto, de onde veio (Edificações → Ciência da Computação), ferramentas e, se quiser, foto e disponibilidade.</p>
+      <div class="selos"><span class="selo">esforço pequeno</span><span class="selo dele">texto e foto seus</span></div>
+    </div></li>
+    <li class="item"><span class="id">A9</span><div>
+      <h3>Contato completo</h3>
+      <p>Um fechamento "Vamos conversar" no fim da página nova e do case, com:</p>
+      <ul>
+        <li>WhatsApp com mensagem pronta;</li>
+        <li>e-mail que copia no clique;</li>
+        <li>o tempo de resposta que você garante;</li>
+        <li>links do GitHub, do LinkedIn e do Instagram, se você passar.</li>
+      </ul>
+      <div class="selos"><span class="selo">esforço pequeno</span><span class="selo dele">redes e tempo de resposta</span></div>
+    </div></li>
+    <li class="item"><span class="id">A10</span><div>
+      <h3>Aparecer melhor no Google</h3>
+      <p>Dados estruturados de FAQ e de serviços, pra busca entender o que você oferece e poder mostrar as perguntas no resultado. Não muda nada visualmente.</p>
+      <div class="selos"><span class="selo">esforço pequeno</span></div>
+    </div></li>
+  </ol>
+
+  <h2>O que só você pode responder</h2>
+  <p class="suave">Sem essas respostas, deixo a frase de fora em vez de inventar.</p>
+  <ol class="perguntas">
+    <li><strong>Preço:</strong> mostrar "a partir de R$ X" em cada serviço, ou só "sob orçamento"?</li>
+    <li><strong>Prazos típicos:</strong> quanto leva uma landing page? E um e-commerce, um SaaS, um site criativo?</li>
+    <li><strong>Pagamento:</strong> qual a divisão (por exemplo, metade pra começar e metade na entrega), por quais formas (Pix, cartão) e se tem recibo ou nota.</li>
+    <li><strong>Depois da entrega:</strong> quantas rodadas de ajuste estão incluídas? Tem manutenção mensal? Com que valor?</li>
+    <li><strong>Resposta:</strong> que tempo de resposta você consegue garantir sempre (por exemplo, até 1 dia útil)?</li>
+    <li><strong>Alcance:</strong> você atende remoto, em qualquer cidade, e em inglês?</li>
+    <li><strong>Contrato:</strong> a proposta sai por escrito, com escopo e prazo?</li>
+    <li><strong>Redes:</strong> LinkedIn e Instagram profissionais, se existirem.</li>
+    <li><strong>Foto:</strong> já tem uma boa pro Sobre, ou fica pra depois?</li>
+  </ol>
+
+  <h2>O que fica de fora de propósito</h2>
+  <ul class="fora">
+    <li><strong>Depoimentos e logos de clientes:</strong> só quando houver clientes reais, com autorização.</li>
+    <li><strong>Números de resultado</strong> ("aumentou as vendas em X%"): a Loja é projeto conceito e não tem esses dados.</li>
+    <li><strong>"Atendo clientes em Portugal"</strong>: está na FAQ da v2, mas não dá pra afirmar. Tiro de lá também, se você quiser.</li>
+    <li><strong>Página só de projetos:</strong> com um projeto, o tambor dá conta.</li>
+  </ul>
+
+  <div class="resposta">
+    <p><strong>Como responder:</strong> diga quais itens aprova e responda as perguntas que já souber. As que faltarem, eu deixo de fora até você decidir. Exemplo:</p>
+    <p class="exemplo">aprovo A1 a A7 e A10 · prazo landing 2 semanas · pagamento 50/50 no Pix · sem preço no site</p>
+    <p class="suave">Na execução, a ordem seria: A3, A4 e A5 (o que tira dúvida mais rápido), depois A2 e A6, e por fim A7, A8, A9 e A10. Cada etapa sai numa prévia pra você ver antes de ir pro ar.</p>
+  </div>
+</main>

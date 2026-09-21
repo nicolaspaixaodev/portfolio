@@ -239,3 +239,17 @@ Pendências do Nicolas:
   - `?giro-parado=0.4` trava o giro no meio.
   - `?tinta-parada` não dissipa a pincelada.
 
+
+## Proposta de conteúdo (20/09/2026), aguardando aprovação
+
+- **Pedido do Nicolas:** as coisas básicas de portfólio, como FAQ e detalhes, "para que a pessoa entre e saia sabendo de tudo que faço".
+- **Ponto de retorno:** a tag `v1-antes-do-conteudo` foi publicada no GitHub. Pra voltar, use `git checkout v1-antes-do-conteudo`, ou promova o deploy anterior na Vercel.
+- **Proposta:** https://claude.ai/artifact/9ud97SxTgyxrzFYiWbKkT8, com cópia em `docs/proposta-conteudo.html`. São 10 itens (A1 a A10):
+  - página nova "Como funciona", com serviços em detalhe, processo, o que vem incluso, FAQ e contato;
+  - link "Ver detalhes" no tambor;
+  - case mais completo;
+  - Sobre reescrito;
+  - dados estruturados.
+- **Perguntas que só ele responde:** preço, prazos, pagamento, pós-entrega, tempo de resposta, alcance, contrato, redes e foto.
+- **Reaproveitamento:** a v2 (`D:\Projetos\portfolio-v2`, não publicada) já tem textos de FAQ, processo e serviços. Reaproveitar o texto revisado, não o visual. A frase da v2 "atendo clientes em Portugal" não é sustentável e fica de fora.
+- **Execução:** num ramo separado, com prévia antes de ir pro ar.
